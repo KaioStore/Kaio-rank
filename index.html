@@ -136,6 +136,43 @@ fetch(API + id)
 
 });
 </script>
+  
+<script>
+const params = new URLSearchParams(window.location.search);
+const userId = params.get("id");
 
+if (userId) {
+  fetch(`https://SEU-REPLIT.XXX.repl.co/perfil/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.erro) return;
+
+      // NOME
+      document.getElementById("nome").innerText = data.nome;
+
+      // AVATAR
+      document.getElementById("avatar").src = data.avatar;
+
+      // TOTAL
+      document.getElementById("total").innerText = `R$${data.total}`;
+
+      // POSIÇÃO
+      document.getElementById("posicao").innerText =
+        data.posicao ? `#${data.posicao} no ranking` : "Sem ranking";
+
+      // VIP
+      if (data.vip) {
+        document.getElementById("vip").innerText = data.vip;
+      } else {
+        document.getElementById("vip").innerText = "Sem cargo";
+      }
+
+    })
+    .catch(() => {
+      console.log("Erro ao puxar dados");
+    });
+}
+</script>
 </body>
 </html>
