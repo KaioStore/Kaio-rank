@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Kaio Rank</title>
+<script defer src="script.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at center, #0a1a2f, #020617);
+  color: white;
+}
+
+/* topo */
+.topo {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.topo h2 {
+  margin: 0;
+}
+
+.btn {
+  background: #0b2a4a;
+  padding: 10px 15px;
+  border-radius: 10px;
+}
+
+/* central */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+}
+
+/* card */
+.card {
+  background: #0b0f1a;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 40px rgba(0, 140, 255, 0.2);
+}
+
+/* avatar */
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid gold;
+}
+
+/* nome */
+.nome {
+  font-size: 28px;
+  margin-top: 10px;
+}
+
+/* rank */
+.rank {
+  color: gold;
+  margin-bottom: 20px;
+}
+
+/* boxes */
+.info {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.box {
+  flex: 1;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+/* gasto */
+.gasto {
+  background: #0b2a4a;
+  box-shadow: 0 0 15px #00aaff44;
+}
+
+/* vip */
+.vip {
+  background: #3a2a00;
+  box-shadow: 0 0 15px #ffd70044;
+}
+
+/* botão */
+.botao {
+  margin-top: 25px;
+  padding: 15px;
+  width: 100%;
+  border-radius: 10px;
+  background: #0b2a4a;
+  color: white;
+  border: none;
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topo">
+  <h2>Kaio Rank</h2>
+  <div class="btn">Minha Conta</div>
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <img id="avatar" class="avatar">
+
+    <div class="nome" id="nome"></div>
+    <div class="rank" id="rank"></div>
+
+    <div class="info">
+      <div class="box gasto">
+        Total gasto:<br>
+        <strong id="gasto"></strong>
+      </div>
+
+      <div class="box vip">
+        VIP atual:<br>
+        <strong id="vip"></strong>
+      </div>
+    </div>
+
+    <button class="botao" onclick="voltar()">
+      Voltar ao Ranking
+    </button>
+
+  </div>
+</div>
+
+</body>
+</html>
