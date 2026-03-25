@@ -8,76 +8,69 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: radial-gradient(circle at center, #0a1a3a, #020617);
   color: white;
 }
 
-/* TOPO */
+/* TOPO /
 .topo {
   display: flex;
   justify-content: space-between;
   padding: 20px;
 }
 
-.topo h1 {
-  font-size: 22px;
-}
-
 .botao-topo {
   background: #0f2a4d;
   padding: 10px 15px;
   border-radius: 8px;
+  cursor: pointer;
 }
 
-/* CONTAINER CENTRAL */
+/ CENTRO /
 .container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  margin-top: 80px;
+  margin-top: 60px;
 }
 
-/* CARD PRINCIPAL */
+/ CARD /
 .card {
   background: #0b0f1a;
-  padding: 40px;
+  padding: 50px;
   border-radius: 20px;
   text-align: center;
-  width: 350px;
-  box-shadow: 0 0 40px rgba(0, 140, 255, 0.3);
+  width: 380px;
+  box-shadow: 0 0 50px rgba(0,140,255,0.4);
 }
 
-/* FOTO */
+/ AVATAR /
 .avatar {
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   border: 4px solid gold;
-  margin-bottom: 10px;
 }
 
-/* COROA */
+/ COROA /
 .coroa {
-  font-size: 30px;
+  font-size: 28px;
 }
 
-/* NOME */
+/ TEXTO /
 .nome {
-  font-size: 26px;
-  margin: 10px 0;
+  font-size: 28px;
+  margin-top: 10px;
 }
 
-/* POSIÇÃO */
 .rank {
   color: gold;
   margin-bottom: 20px;
 }
 
-/* CAIXAS */
+/ BOX /
 .info {
   display: flex;
-  justify-content: space-between;
   gap: 15px;
 }
 
@@ -88,43 +81,47 @@ body {
 }
 
 .gasto {
-  background: rgba(0, 140, 255, 0.2);
-  box-shadow: 0 0 15px rgba(0, 140, 255, 0.5);
+  background: rgba(0,140,255,0.2);
+  box-shadow: 0 0 15px rgba(0,140,255,0.6);
 }
 
 .vip {
-  background: rgba(255, 180, 0, 0.2);
-  box-shadow: 0 0 15px rgba(255, 180, 0, 0.5);
+  background: rgba(255,180,0,0.2);
+  box-shadow: 0 0 15px rgba(255,180,0,0.6);
 }
 
-/* BOTÃO */
+/ BOTÃO */
 .botao {
   margin-top: 20px;
   background: #0f2a4d;
   padding: 15px;
   border-radius: 10px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.botao:hover {
+  background: #163b6b;
 }
 </style>
-
 </head>
 
 <body>
 
 <div class="topo">
-  <h1>Kaio Store</h1>
-  <div class="botao-topo">Minha Conta</div>
+  <h2>Kaio Store</h2>
+  <div class="botao-topo" onclick="minhaConta()">Minha Conta</div>
 </div>
 
 <div class="container">
   <div class="card">
 
-    <div class="coroa">👑</div>
+    <div class="coroa" id="coroa"></div>
 
-    <img src="https://cdn.discordapp.com/embed/avatars/0.png" class="avatar">
+    <img id="avatar" class="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png">
 
-    <div class="nome" id="nome">Usuario</div>
-    <div class="rank">#1 no ranking</div>
+    <div class="nome" id="nome">Carregando...</div>
+    <div class="rank" id="rank"></div>
 
     <div class="info">
       <div class="box gasto">
@@ -134,7 +131,7 @@ body {
 
       <div class="box vip">
         <div>VIP atual:</div>
-        <strong id="vip">Bronze</strong>
+        <strong id="vip">...</strong>
       </div>
     </div>
 
@@ -144,14 +141,55 @@ body {
 </div>
 
 <script>
-function voltar() {
-  window.location.href = "https://discord.com";
+
+// 🔥 ALTERA AQUI (TESTE)
+let usuario = {
+  nome: "legal07397",
+  gasto: 80, // muda aqui
+  avatar: "https://cdn.discordapp.com/embed/avatars/0.png",
+  posicao: 1
+};
+
+// 🔥 VIP COM PRATA
+function calcularVIP(valor) {
+  if (valor >= 1000) return "Diamante";
+  if (valor >= 500) return "Ouro";
+  if (valor >= 300) return "Prata";
+  if (valor >= 100) return "Bronze";
+  return null;
 }
 
-// SIMULAÇÃO (depois a gente puxa do bot)
-document.getElementById("nome").innerText = "legal07397";
-document.getElementById("gasto").innerText = "R$1.800";
-document.getElementById("vip").innerText = "Diamante";
+// APLICAR
+document.getElementById("nome").innerText = usuario.nome;
+document.getElementById("gasto").innerText = "R$" + usuario.gasto;
+document.getElementById("avatar").src = usuario.avatar;
+
+// VIP
+let vip = calcularVIP(usuario.gasto);
+
+if (vip === null) {
+  document.getElementById("vip").innerText = "Ainda sem cargo";
+} else {
+  document.getElementById("vip").innerText = vip;
+}
+
+// RANK
+if (usuario.posicao === 1) {
+  document.getElementById("rank").innerText = "#1 no ranking";
+  document.getElementById("coroa").innerText = "👑";
+} else {
+  document.getElementById("rank").innerText = "#" + usuario.posicao + " no ranking";
+}
+
+// BOTÕES
+function voltar() {
+  window.location.href = "https://discord.com"; // coloca seu link
+}
+
+function minhaConta() {
+  alert("Perfil em breve");
+}
+
 </script>
 
 </body>
