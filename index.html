@@ -1,146 +1,158 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kaio Store</title>
-<script defer src="script.js"></script>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: radial-gradient(circle at center, #0a1a2f, #020617);
+  background: radial-gradient(circle at center, #0a1a3a, #020617);
   color: white;
 }
 
-/* topo */
+/* TOPO */
 .topo {
   display: flex;
   justify-content: space-between;
   padding: 20px;
 }
 
-.topo h2 {
-  margin: 0;
+.topo h1 {
+  font-size: 22px;
 }
 
-.btn {
-  background: #0b2a4a;
+.botao-topo {
+  background: #0f2a4d;
   padding: 10px 15px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-/* central */
+/* CONTAINER CENTRAL */
 .container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 85vh;
+  align-items: flex-start;
+  margin-top: 80px;
 }
 
-/* card */
+/* CARD PRINCIPAL */
 .card {
   background: #0b0f1a;
   padding: 40px;
   border-radius: 20px;
   text-align: center;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 0 40px rgba(0, 140, 255, 0.2);
+  width: 350px;
+  box-shadow: 0 0 40px rgba(0, 140, 255, 0.3);
 }
 
-/* avatar */
+/* FOTO */
 .avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 4px solid gold;
+  margin-bottom: 10px;
 }
 
-/* nome */
+/* COROA */
+.coroa {
+  font-size: 30px;
+}
+
+/* NOME */
 .nome {
-  font-size: 28px;
-  margin-top: 10px;
+  font-size: 26px;
+  margin: 10px 0;
 }
 
-/* rank */
+/* POSIÇÃO */
 .rank {
   color: gold;
   margin-bottom: 20px;
 }
 
-/* boxes */
+/* CAIXAS */
 .info {
   display: flex;
+  justify-content: space-between;
   gap: 15px;
-  margin-top: 20px;
 }
 
 .box {
   flex: 1;
-  padding: 15px;
+  padding: 20px;
   border-radius: 12px;
 }
 
-/* gasto */
 .gasto {
-  background: #0b2a4a;
-  box-shadow: 0 0 15px #00aaff44;
+  background: rgba(0, 140, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 140, 255, 0.5);
 }
 
-/* vip */
 .vip {
-  background: #3a2a00;
-  box-shadow: 0 0 15px #ffd70044;
+  background: rgba(255, 180, 0, 0.2);
+  box-shadow: 0 0 15px rgba(255, 180, 0, 0.5);
 }
 
-/* botão */
+/* BOTÃO */
 .botao {
-  margin-top: 25px;
+  margin-top: 20px;
+  background: #0f2a4d;
   padding: 15px;
-  width: 100%;
   border-radius: 10px;
-  background: #0b2a4a;
-  color: white;
-  border: none;
-  font-size: 16px;
+  cursor: pointer;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="topo">
-  <h2>Kaio Rank</h2>
-  <div class="btn">Minha Conta</div>
+  <h1>Kaio Store</h1>
+  <div class="botao-topo">Minha Conta</div>
 </div>
 
 <div class="container">
   <div class="card">
 
-    <img id="avatar" class="avatar">
+    <div class="coroa">👑</div>
 
-    <div class="nome" id="nome"></div>
-    <div class="rank" id="rank"></div>
+    <img src="https://cdn.discordapp.com/embed/avatars/0.png" class="avatar">
+
+    <div class="nome" id="nome">Usuario</div>
+    <div class="rank">#1 no ranking</div>
 
     <div class="info">
       <div class="box gasto">
-        Total gasto:<br>
-        <strong id="gasto"></strong>
+        <div>Total gasto:</div>
+        <strong id="gasto">R$0</strong>
       </div>
 
       <div class="box vip">
-        VIP atual:<br>
-        <strong id="vip"></strong>
+        <div>VIP atual:</div>
+        <strong id="vip">Bronze</strong>
       </div>
     </div>
 
-    <button class="botao" onclick="voltar()">
-      Voltar ao Ranking
-    </button>
+    <div class="botao" onclick="voltar()">Voltar ao Ranking</div>
 
   </div>
 </div>
+
+<script>
+function voltar() {
+  window.location.href = "https://discord.com";
+}
+
+// SIMULAÇÃO (depois a gente puxa do bot)
+document.getElementById("nome").innerText = "legal07397";
+document.getElementById("gasto").innerText = "R$1.800";
+document.getElementById("vip").innerText = "Diamante";
+</script>
 
 </body>
 </html>
