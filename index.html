@@ -8,64 +8,73 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #0f0f0f;
+  background: #0b0b0b;
   color: white;
   text-align: center;
 }
 
 /* TOPO */
 .topo {
-  padding: 25px;
-  font-size: 32px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+  font-size: 26px;
   font-weight: bold;
 }
 
 /* PERFIL */
 .perfil-box {
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
+/* AVATAR */
 #avatar {
   width: 130px;
+  height: 130px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  border: 3px solid #333;
 }
 
+/* NOME */
 #nome {
-  font-size: 28px;
-  margin: 10px 0;
+  margin-top: 15px;
+  font-size: 26px;
 }
 
+/* POSIÇÃO */
 #posicao {
-  opacity: 0.7;
+  color: #aaa;
   margin-bottom: 20px;
 }
 
 /* CARDS */
 .card {
-  width: 320px;
-  margin: 12px auto;
+  width: 85%;
+  max-width: 420px;
+  margin: 15px auto;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 18px;
 }
 
+/* CARD PRETO */
 .card-azul {
-  background: #1e3a8a;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
 }
 
+/* CARD CINZA */
 .card-dourado {
-  background: #b45309;
+  background: #222;
+  border: 1px solid #333;
 }
 
-/* BOTAO */
-.botao {
-  margin-top: 25px;
-  display: inline-block;
-  padding: 12px 25px;
-  background: #222;
-  border-radius: 8px;
-  cursor: pointer;
+/* HOVER PREMIUM */
+.card:hover {
+  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+  transform: scale(1.02);
+  transition: 0.2s;
 }
 </style>
 
@@ -96,10 +105,6 @@ body {
     <span id="vip"></span>
   </div>
 
-  <div class="botao" onclick="voltar()">
-    Voltar ao Ranking
-  </div>
-
 </div>
 
 <script>
@@ -117,42 +122,25 @@ async function carregarPerfil(id) {
     const res = await fetch(API + "/perfil/" + id);
     const data = await res.json();
 
-    if (!data || data.erro) throw new Error();
-
-    document.getElementById("avatar").src =
-      data.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-
-    document.getElementById("nome").innerText = data.nome || "Sem nome";
-    document.getElementById("total").innerText = "R$" + (data.total || 0);
-    document.getElementById("vip").innerText = data.vip || "Nenhum";
-
-    if (data.posicao) {
-      document.getElementById("posicao").innerText =
-        "#" + data.posicao + " no ranking";
-    }
+    document.getElementById("avatar").src = data.avatar;
+    document.getElementById("nome").innerText = data.nome;
+    document.getElementById("total").innerText = "R$" + data.total;
+    document.getElementById("vip").innerText = data.vip || "Sem cargo";
+    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
 
   } catch {
-    document.getElementById("perfil").innerHTML = `
-      <h2>Erro ao carregar usuário</h2>
-    `;
+    document.getElementById("perfil").innerText = "Erro ao carregar";
   }
 }
 
-/* VOLTAR */
-function voltar() {
-  window.location.href = "https://discord.com";
-}
-
-/* INICIO */
+/* START */
 window.addEventListener("DOMContentLoaded", () => {
   const id = pegarID();
 
   if (id) {
     carregarPerfil(id);
   } else {
-    document.getElementById("perfil").innerHTML = `
-      <h2>Nenhum usuário selecionado</h2>
-    `;
+    document.getElementById("perfil").innerHTML = "<h2>Nenhum usuário selecionado</h2>";
   }
 });
 </script>
