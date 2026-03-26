@@ -7,8 +7,8 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0a0a0a; /* FUNDO LISO PRETO */
+  font-family: Arial;
+  background: #0a0a0a;
   color: white;
 }
 
@@ -17,116 +17,119 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 18px;
 }
 
 .topo h2 {
-  font-size: 26px; /* MAIOR */
-  font-weight: bold;
+  font-size: 22px;
 }
 
-.botao {
+.login-btn {
   background: #1c1c1c;
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 /* MENU */
 #menu {
   position: absolute;
-  right: 20px;
-  top: 70px;
-  background: #1c1c1c;
-  padding: 10px;
+  right: 18px;
+  top: 60px;
+  background: #111;
   border-radius: 10px;
+  padding: 10px;
   display: none;
 }
 
+#menu div {
+  padding: 8px;
+  cursor: pointer;
+}
+
 /* PERFIL */
-.perfil-box {
+.perfil {
   text-align: center;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
-#avatar {
-  width: 120px;
-  height: 120px;
+.perfil img {
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  border: 4px solid gold;
+  border: 3px solid gold;
 }
 
-/* NOME */
-#nome {
-  font-size: 24px;
+.nome {
+  font-size: 22px;
   margin-top: 10px;
 }
 
-/* POSIÇÃO */
-#posicao {
-  color: #aaa;
-  margin-bottom: 20px;
+.posicao {
+  font-size: 14px;
+  opacity: 0.7;
 }
 
 /* CARDS */
 .card {
-  margin: 12px auto;
+  margin: 15px auto;
   padding: 18px;
-  width: 85%;
-  max-width: 350px;
+  width: 90%;
+  max-width: 380px;
   border-radius: 14px;
-  font-size: 17px;
+  font-size: 16px;
 }
 
-.card-azul {
-  background: #1c1c1c;
+.azul {
+  background: #1c1f26;
 }
 
-.card-dourado {
-  background: #b8921e;
+.dourado {
+  background: #c89b2c;
   color: black;
 }
 
+/* BOTAO */
+.botao {
+  background: #1c1c1c;
+  margin: 20px auto;
+  padding: 14px;
+  width: 90%;
+  max-width: 380px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* RANK */
+.rank-item {
+  background: #1c1f26;
+  margin: 12px auto;
+  padding: 16px;
+  width: 90%;
+  max-width: 380px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+}
 </style>
 
 </head>
-
 <body>
 
-<!-- TOPO -->
 <div class="topo">
   <h2>Kaio Store</h2>
-
-  <div onclick="toggleMenu()" class="botao" id="loginText">
-    Login
-  </div>
+  <div class="login-btn" id="loginText" onclick="toggleMenu()">Login</div>
 </div>
 
 <div id="menu"></div>
 
-<!-- PERFIL -->
-<div id="perfil" class="perfil-box">
-
-  <img id="avatar">
-
-  <h1 id="nome"></h1>
-  <p id="posicao"></p>
-
-  <div class="card card-azul">
-    💰 Total gasto<br>
-    <span id="total"></span>
-  </div>
-
-  <div class="card card-dourado">
-    👑 VIP atual<br>
-    <span id="vip"></span>
-  </div>
-
-</div>
+<div id="conteudo"></div>
 
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
+
+let usuarioLogado = null;
 
 /* TOKEN */
 function pegarToken() {
@@ -138,14 +141,14 @@ function pegarToken() {
 
     localStorage.setItem("discord_token", token);
     window.location.hash = "";
-    location.reload();
+    window.location.href = window.location.pathname + window.location.search;
     return token;
   }
 
   return localStorage.getItem("discord_token");
 }
 
-/* LOGIN BOTÃO */
+/* LOGIN BOTAO */
 function atualizarBotaoLogin(user) {
   const btn = document.getElementById("loginText");
   const menu = document.getElementById("menu");
@@ -165,6 +168,13 @@ function atualizarBotaoLogin(user) {
 }
 
 function toggleMenu() {
+  const token = localStorage.getItem("discord_token");
+
+  if (!token) {
+    loginDiscord();
+    return;
+  }
+
   const menu = document.getElementById("menu");
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
@@ -174,7 +184,7 @@ function logout() {
   location.reload();
 }
 
-/* USUÁRIO DISCORD */
+/* DISCORD USER */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
 
@@ -189,11 +199,16 @@ async function pegarUsuarioDiscord() {
     });
 
     const user = await res.json();
+    usuarioLogado = user;
 
     atualizarBotaoLogin(user);
 
-    /* CARREGAR PERFIL AUTOMÁTICO */
-    carregarPerfil(user.id, user);
+    const url = new URL(window.location.href);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      carregarPerfil(user.id);
+    }
 
   } catch {
     atualizarBotaoLogin(null);
@@ -201,27 +216,66 @@ async function pegarUsuarioDiscord() {
 }
 
 /* PERFIL */
-async function carregarPerfil(id, discordUser = null) {
+async function carregarPerfil(id) {
   try {
     const res = await fetch(API + "/perfil/" + id);
     const data = await res.json();
 
-    /* AVATAR CORRIGIDO */
-    if (discordUser && discordUser.avatar) {
-      document.getElementById("avatar").src =
-        `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
-    } else {
-      document.getElementById("avatar").src = data.avatar;
-    }
+    document.getElementById("conteudo").innerHTML = `
+      <div class="perfil">
+        <img src="${data.avatar}">
+        <div class="nome">${data.nome}</div>
+        <div class="posicao">#${data.posicao} no ranking</div>
 
-    document.getElementById("nome").innerText = data.nome;
-    document.getElementById("total").innerText = "R$" + data.total;
-    document.getElementById("vip").innerText = data.vip || "Sem cargo";
-    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
+        <div class="card azul">
+          💰 Total gasto<br><b>R$${data.total}</b>
+        </div>
+
+        <div class="card dourado">
+          👑 VIP atual<br><b>${data.vip || "Sem cargo"}</b>
+        </div>
+
+        <div class="botao" onclick="voltarRanking()">
+          Voltar pro ranking
+        </div>
+      </div>
+    `;
 
   } catch {
-    document.getElementById("perfil").innerText = "Erro ao carregar";
+    document.getElementById("conteudo").innerText = "Erro ao carregar perfil";
   }
+}
+
+/* RANKING */
+async function carregarRanking() {
+  try {
+    const res = await fetch(API + "/ranking");
+    const data = await res.json();
+
+    let html = "";
+
+    data.forEach((user, i) => {
+      html += `
+        <div class="rank-item" onclick="abrir('${user.id}')">
+          ${i+1}. ${user.nome} - R$${user.total}
+        </div>
+      `;
+    });
+
+    document.getElementById("conteudo").innerHTML = html;
+
+  } catch {
+    document.getElementById("conteudo").innerText = "Erro ao carregar ranking";
+  }
+}
+
+/* NAV */
+function abrir(id) {
+  window.location.href = "?id=" + id;
+}
+
+function voltarRanking() {
+  window.location.href = "/";
 }
 
 /* LOGIN DISCORD */
@@ -236,6 +290,16 @@ function loginDiscord() {
 
 /* START */
 window.addEventListener("DOMContentLoaded", () => {
+
+  const url = new URL(window.location.href);
+  const id = url.searchParams.get("id");
+
+  if (id) {
+    carregarPerfil(id);
+  } else {
+    carregarRanking();
+  }
+
   pegarUsuarioDiscord();
 });
 </script>
