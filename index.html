@@ -33,16 +33,20 @@ header {
   font-size: 16px;
 }
 
-/* CONTAINER */
+/* 🔥 CENTRALIZA TUDO PERFEITO */
 .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh; /* 🔥 centraliza vertical */
   text-align: center;
-  margin-top: 20px; /* 🔥 DIMINUI DISTÂNCIA */
 }
 
-/* AVATAR MAIOR */
+/* AVATAR */
 .avatar {
-  width: 150px;
-  height: 150px;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
   border: 5px solid gold;
   margin-bottom: 10px;
@@ -50,7 +54,7 @@ header {
 
 /* NOME */
 .nome {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: bold;
 }
 
@@ -58,15 +62,17 @@ header {
 .posicao {
   color: gold;
   font-size: 18px;
-  margin-bottom: 15px; /* 🔥 MENOS ESPAÇO */
+  margin-bottom: 20px;
 }
 
-/* CARDS MAIORES */
+/* CARDS GRANDES */
 .card {
-  margin: 8px auto; /* 🔥 MAIS JUNTO */
-  width: 300px; /* 🔥 MAIOR */
-  padding: 20px;
+  width: 85%;
+  max-width: 420px;
+  padding: 22px;
   border-radius: 15px;
+  margin: 10px 0;
+  text-align: center;
   font-size: 18px;
 }
 
@@ -80,25 +86,33 @@ header {
   background: linear-gradient(45deg, #8a6d1d, #cfa62f);
 }
 
-/* BOTÃO MAIOR */
+/* BOTÃO CENTRALIZADO */
 .botao {
   margin-top: 15px;
-  padding: 16px;
-  width: 300px;
+  width: 85%;
+  max-width: 420px;
+  padding: 18px;
   border-radius: 12px;
   background: #3d5c86;
   cursor: pointer;
   font-size: 18px;
+  text-align: center;
 }
 
 /* RANKING */
 .ranking {
-  margin-top: 30px;
+  margin-top: 40px;
+  text-align: center;
 }
 
 /* ITENS */
 .item {
-  margin: 10px;
+  margin: 10px auto;
+  padding: 12px;
+  width: 85%;
+  max-width: 420px;
+  background: #1a2f4d;
+  border-radius: 10px;
   cursor: pointer;
 }
 </style>
