@@ -175,6 +175,11 @@ async function pegarUsuarioDiscord() {
   const user = await res.json();
 
   document.querySelector(".login").innerText = user.username;
+
+  // 🔥 ADICIONADO: REDIRECIONAR PRO PERFIL AUTOMÁTICO
+  if (!window.location.search.includes("id=")) {
+    window.location.href = "?id=" + user.id;
+  }
 }
 
 function pegarID() {
@@ -239,7 +244,7 @@ if (id) {
   carregarRanking();
 }
 
-// 🔥 ESSA LINHA QUE FALTAVA (AGORA FUNCIONA O LOGIN)
+// 🔥 LOGIN DISCORD ATIVO
 pegarUsuarioDiscord();
 
 </script>
