@@ -4,45 +4,8 @@
 <meta charset="UTF-8">
 <title>Ranking</title>
 
-<style>
-body {
-  background: #0d0d0d;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-}
+title>
 
-.topo {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-}
-
-.botao {
-  background: #1a1a1a;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-#menu {
-  display: none;
-  position: absolute;
-  right: 10px;
-  top: 60px;
-  background: #1a1a1a;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.item {
-  background: #1a1a1a;
-  margin: 10px;
-  padding: 15px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-</style>
 </head>
 
 <body>
@@ -62,14 +25,27 @@ body {
 <div id="ranking"></div>
 
 <!-- PERFIL -->
-<div id="perfil">
-  <img id="avatar" width="100" style="border-radius:50%">
+<div id="perfil" class="perfil-box">
+
+  <img id="avatar">
+
   <h1 id="nome"></h1>
-  <p id="total"></p>
-  <p id="vip"></p>
   <p id="posicao"></p>
 
-  <div class="botao" onclick="voltar()">Voltar</div>
+  <div class="card card-azul">
+    💰 Total gasto<br>
+    <span id="total"></span>
+  </div>
+
+  <div class="card card-dourado">
+    👑 VIP atual<br>
+    <span id="vip"></span>
+  </div>
+
+  <div class="botao" onclick="voltar()">
+    Voltar ao Ranking
+  </div>
+
 </div>
 
 <script>
