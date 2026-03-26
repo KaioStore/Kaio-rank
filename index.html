@@ -7,8 +7,8 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(180deg, #0a0a0a, #111827);
+  font-family: Arial, sans-serif;
+  background: #0a0a0a; /* FUNDO LISO PRETO */
   color: white;
 }
 
@@ -20,16 +20,17 @@ body {
   padding: 20px;
 }
 
-.logo {
-  font-size: 22px;
+.topo h2 {
+  font-size: 26px; /* MAIOR */
   font-weight: bold;
 }
 
 .botao {
-  background: #1f2937;
-  padding: 10px 18px;
-  border-radius: 8px;
+  background: #1c1c1c;
+  padding: 12px 18px;
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 /* MENU */
@@ -37,9 +38,9 @@ body {
   position: absolute;
   right: 20px;
   top: 70px;
-  background: #111827;
-  border-radius: 10px;
+  background: #1c1c1c;
   padding: 10px;
+  border-radius: 10px;
   display: none;
 }
 
@@ -51,41 +52,51 @@ body {
 
 #avatar {
   width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 3px solid gold;
+  border: 4px solid gold;
 }
 
+/* NOME */
 #nome {
-  margin: 10px 0;
+  font-size: 24px;
+  margin-top: 10px;
 }
 
-/* CARDS GRANDES */
+/* POSIÇÃO */
+#posicao {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+/* CARDS */
 .card {
+  margin: 12px auto;
+  padding: 18px;
   width: 85%;
-  max-width: 400px;
-  margin: 20px auto;
-  padding: 25px;
-  border-radius: 12px;
-  font-size: 18px;
+  max-width: 350px;
+  border-radius: 14px;
+  font-size: 17px;
 }
 
 .card-azul {
-  background: #1f2937;
+  background: #1c1c1c;
 }
 
 .card-dourado {
-  background: #b48a1e;
+  background: #b8921e;
   color: black;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <!-- TOPO -->
 <div class="topo">
-  <div class="logo">Kaio Store</div>
+  <h2>Kaio Store</h2>
 
   <div onclick="toggleMenu()" class="botao" id="loginText">
     Login
@@ -117,8 +128,6 @@ body {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
-let usuarioLogado = null;
-
 /* TOKEN */
 function pegarToken() {
   const hash = window.location.hash;
@@ -129,7 +138,7 @@ function pegarToken() {
 
     localStorage.setItem("discord_token", token);
     window.location.hash = "";
-    window.location.reload();
+    location.reload();
     return token;
   }
 
@@ -155,19 +164,17 @@ function atualizarBotaoLogin(user) {
   }
 }
 
-/* MENU */
 function toggleMenu() {
   const menu = document.getElementById("menu");
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-/* LOGOUT */
 function logout() {
   localStorage.removeItem("discord_token");
   location.reload();
 }
 
-/* PEGAR USER */
+/* USUÁRIO DISCORD */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
 
@@ -182,27 +189,35 @@ async function pegarUsuarioDiscord() {
     });
 
     const user = await res.json();
-    usuarioLogado = user;
 
     atualizarBotaoLogin(user);
+
+    /* CARREGAR PERFIL AUTOMÁTICO */
+    carregarPerfil(user.id, user);
+
   } catch {
     atualizarBotaoLogin(null);
   }
 }
 
 /* PERFIL */
-async function carregarPerfil() {
+async function carregarPerfil(id, discordUser = null) {
   try {
-    const res = await fetch(API + "/ranking");
+    const res = await fetch(API + "/perfil/" + id);
     const data = await res.json();
 
-    const top = data[0]; // pega só o primeiro
+    /* AVATAR CORRIGIDO */
+    if (discordUser && discordUser.avatar) {
+      document.getElementById("avatar").src =
+        `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
+    } else {
+      document.getElementById("avatar").src = data.avatar;
+    }
 
-    document.getElementById("avatar").src = top.avatar;
-    document.getElementById("nome").innerText = top.nome;
-    document.getElementById("total").innerText = "R$" + top.total;
-    document.getElementById("vip").innerText = top.vip;
-    document.getElementById("posicao").innerText = "#1 no ranking";
+    document.getElementById("nome").innerText = data.nome;
+    document.getElementById("total").innerText = "R$" + data.total;
+    document.getElementById("vip").innerText = data.vip || "Sem cargo";
+    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
 
   } catch {
     document.getElementById("perfil").innerText = "Erro ao carregar";
@@ -220,10 +235,9 @@ function loginDiscord() {
 }
 
 /* START */
-window.onload = () => {
+window.addEventListener("DOMContentLoaded", () => {
   pegarUsuarioDiscord();
-  carregarPerfil();
-};
+});
 </script>
 
 </body>
