@@ -148,6 +148,40 @@ header {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
+  // 🔥 PEGAR TOKEN DO DISCORD
+function pegarToken() {
+  const hash = window.location.hash;
+
+  if (hash.includes("access_token")) {
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get("access_token");
+
+    localStorage.setItem("discord_token", token);
+
+    window.location.hash = "";
+    return token;
+  }
+
+  return localStorage.getItem("discord_token");
+}
+
+// 🔥 PEGAR USUÁRIO
+async function pegarUsuarioDiscord() {
+  const token = pegarToken();
+  if (!token) return;
+
+  const res = await fetch("https://discord.com/api/users/@me", {
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
+
+  const user = await res.json();
+
+  // muda botão
+  document.querySelector(".login").innerText = user.username;
+}
+  
 function pegarID() {
   const url = new URL(window.location.href);
   return url.searchParams.get("id");
