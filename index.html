@@ -1,110 +1,228 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Ranking</title>
+<meta charset="UTF-8">
+<title>Ranking</title>
 
-  <style>
-    body {
-      background: #0d0d0d;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-    }
+<style>
+body {
+  background: #0d0d0d;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
 
-    .item {
-      background: #1a1a1a;
-      margin: 10px;
-      padding: 15px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+.topo {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+}
 
-    .item:hover {
-      background: #2a2a2a;
-    }
+.botao {
+  background: #1a1a1a;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    img {
-      margin-top: 20px;
-    }
-  </style>
+#menu {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 60px;
+  background: #1a1a1a;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.item {
+  background: #1a1a1a;
+  margin: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+</style>
 </head>
 
 <body>
 
-  <h1>Ranking</h1>
+<!-- TOPO -->
+<div class="topo">
+  <h2>Ranking</h2>
 
-  <!-- 🔥 RANKING -->
-  <div id="ranking"></div>
-
-  <!-- 🔥 PERFIL -->
-  <div id="perfil">
-    <img id="avatar" width="100" style="border-radius:50%">
-    <h1 id="nome"></h1>
-    <p id="total"></p>
-    <p id="vip"></p>
-    <p id="posicao"></p>
-
-    <div onclick="voltar()" style="margin-top:20px; cursor:pointer;">
-      ← Voltar
-    </div>
+  <div onclick="toggleMenu()" class="botao" id="loginText">
+    Login
   </div>
+</div>
 
-  <!-- 🔥 SCRIPT (SEMPRE NO FINAL) -->
-  <script>
-  const API = "https://attractive-analysis-production-b8e2.up.railway.app";
+<div id="menu"></div>
 
-  function pegarID() {
-    const url = new URL(window.location.href);
-    return url.searchParams.get("id");
+<!-- RANKING -->
+<div id="ranking"></div>
+
+<!-- PERFIL -->
+<div id="perfil">
+  <img id="avatar" width="100" style="border-radius:50%">
+  <h1 id="nome"></h1>
+  <p id="total"></p>
+  <p id="vip"></p>
+  <p id="posicao"></p>
+
+  <div class="botao" onclick="voltar()">Voltar</div>
+</div>
+
+<script>
+const API = "https://attractive-analysis-production-b8e2.up.railway.app";
+
+let usuarioLogado = null;
+
+/* TOKEN */
+function pegarToken() {
+  const hash = window.location.hash;
+
+  if (hash.includes("access_token")) {
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get("access_token");
+
+    localStorage.setItem("discord_token", token);
+    window.location.hash = "";
+    window.location.href = "?reload=1";
+    return token;
   }
 
-  async function carregarPerfil(id) {
-    try {
-      const res = await fetch(API + "/perfil/" + id);
-      const data = await res.json();
+  return localStorage.getItem("discord_token");
+}
 
-      document.getElementById("avatar").src = data.avatar;
-      document.getElementById("nome").innerText = data.nome;
-      document.getElementById("total").innerText = "R$" + data.total;
-      document.getElementById("vip").innerText = data.vip;
-      document.getElementById("posicao").innerText = "#" + data.posicao;
+/* LOGIN */
+function atualizarBotaoLogin(user) {
+  const btn = document.getElementById("loginText");
+  const menu = document.getElementById("menu");
 
-    } catch {
-      document.getElementById("perfil").innerText = "Erro ao carregar";
-    }
+  if (!btn || !menu) return;
+
+  if (user) {
+    btn.innerText = "Minha Conta";
+    menu.innerHTML = `
+      <div style="margin-bottom:8px;">${user.username}</div>
+      <div onclick="logout()">Sair</div>
+    `;
+  } else {
+    btn.innerText = "Login";
+    menu.innerHTML = `
+      <div onclick="loginDiscord()">Entrar com Discord</div>
+    `;
+  }
+}
+
+function logout() {
+  localStorage.removeItem("discord_token");
+  location.reload();
+}
+
+/* MENU */
+function toggleMenu() {
+  const token = localStorage.getItem("discord_token");
+
+  if (!token) {
+    loginDiscord();
+    return;
   }
 
-  async function carregarRanking() {
-    try {
-      const res = await fetch(API + "/ranking");
-      const data = await res.json();
+  const menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
 
-      const div = document.getElementById("ranking");
-      div.innerHTML = "";
+/* DISCORD USER */
+async function pegarUsuarioDiscord() {
+  const token = pegarToken();
 
-      data.forEach((user, i) => {
-        div.innerHTML += `
-          <div class="item" onclick="abrir('${user.id}')">
-            ${i+1}. ${user.nome} - R$${user.total}
-          </div>
-        `;
-      });
-
-    } catch {
-      document.getElementById("ranking").innerText = "Erro ao carregar ranking";
-    }
+  if (!token) {
+    atualizarBotaoLogin(null);
+    return;
   }
 
-  function abrir(id) {
-    window.location.href = "?id=" + id;
-  }
+  try {
+    const res = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: "Bearer " + token }
+    });
 
-  function voltar() {
-    window.location.href = "/";
-  }
+    const user = await res.json();
+    usuarioLogado = user;
 
-  // 🔥 INICIO
+    atualizarBotaoLogin(user);
+  } catch {
+    atualizarBotaoLogin(null);
+  }
+}
+
+/* ID */
+function pegarID() {
+  const url = new URL(window.location.href);
+  return url.searchParams.get("id");
+}
+
+/* PERFIL */
+async function carregarPerfil(id) {
+  try {
+    const res = await fetch(API + "/perfil/" + id);
+    const data = await res.json();
+
+    document.getElementById("avatar").src = data.avatar;
+    document.getElementById("nome").innerText = data.nome;
+    document.getElementById("total").innerText = "R$" + data.total;
+    document.getElementById("vip").innerText = data.vip;
+    document.getElementById("posicao").innerText = "#" + data.posicao;
+
+  } catch {
+    document.getElementById("perfil").innerText = "Erro ao carregar";
+  }
+}
+
+/* RANKING */
+async function carregarRanking() {
+  try {
+    const res = await fetch(API + "/ranking");
+    const data = await res.json();
+
+    const div = document.getElementById("ranking");
+    div.innerHTML = "";
+
+    data.forEach((user, i) => {
+      div.innerHTML += `
+        <div class="item" onclick="abrir('${user.id}')">
+          ${i+1}. ${user.nome} - R$${user.total}
+        </div>
+      `;
+    });
+
+  } catch {
+    document.getElementById("ranking").innerText = "Erro ao carregar ranking";
+  }
+}
+
+/* NAV */
+function abrir(id) {
+  window.location.href = "?id=" + id;
+}
+
+function voltar() {
+  window.location.href = "/";
+}
+
+/* LOGIN DISCORD */
+function loginDiscord() {
+  window.location.href =
+    "https://discord.com/oauth2/authorize" +
+    "?client_id=1485623307364466861" +
+    "&response_type=token" +
+    "&scope=identify" +
+    "&redirect_uri=" + encodeURIComponent(window.location.origin);
+}
+
+/* START */
+window.addEventListener("DOMContentLoaded", () => {
+
   const id = pegarID();
 
   if (id) {
@@ -114,7 +232,10 @@
     document.getElementById("perfil").style.display = "none";
     carregarRanking();
   }
-  </script>
+
+  pegarUsuarioDiscord();
+});
+</script>
 
 </body>
 </html>
