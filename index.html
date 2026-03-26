@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Kaio Rank</title>
+<title>Kaio Store</title>
 
 <style>
 body {
@@ -141,10 +141,10 @@ body {
   <div class="card">
 
     <!-- AVATAR -->
-    <img id="avatar" class="avatar">
+    <img id="avatar" class="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png">
 
     <!-- NOME -->
-    <div id="nome" class="nome"></div>
+    <div id="nome" class="nome">Carregando...</div>
 
     <!-- RANK -->
     <div id="rank" class="rank"></div>
@@ -154,12 +154,12 @@ body {
 
       <div class="box gasto">
         💰 TOTAL GASTO
-        <div id="total" class="valor"></div>
+        <div id="total" class="valor">--</div>
       </div>
 
       <div class="box vip">
         👑 VIP ATUAL
-        <div id="vip" class="valor"></div>
+        <div id="vip" class="valor">--</div>
       </div>
 
     </div>
@@ -191,7 +191,7 @@ if (!id) {
   .then(data => {
 
     if (data.erro) {
-      document.getElementById("nome").innerText = "Erro ao carregar";
+      document.getElementById("nome").innerText = "Perfil indisponível";
       return;
     }
 
@@ -199,23 +199,20 @@ if (!id) {
     document.getElementById("nome").innerText = data.nome;
 
     // AVATAR
-    document.getElementById("avatar").src = data.avatar;
+    if (data.avatar) {
+      document.getElementById("avatar").src = data.avatar;
+    }
 
     // TOTAL
-    document.getElementById("total").innerText = "R$" + data.total;
+    document.getElementById("total").innerText = "R$" + (data.total || 0);
 
     // VIP + REQUISITOS
     let vipTexto = "Sem cargo";
 
-    if (data.vip === "Bronze") {
-      vipTexto = "Bronze (R$100)";
-    } else if (data.vip === "Prata") {
-      vipTexto = "Prata (R$300)";
-    } else if (data.vip === "Ouro") {
-      vipTexto = "Ouro (R$500)";
-    } else if (data.vip === "Diamante") {
-      vipTexto = "Diamante (R$1000)";
-    }
+    if (data.vip === "Bronze") vipTexto = "Bronze (R$100)";
+    else if (data.vip === "Prata") vipTexto = "Prata (R$300)";
+    else if (data.vip === "Ouro") vipTexto = "Ouro (R$500)";
+    else if (data.vip === "Diamante") vipTexto = "Diamante (R$1000)";
 
     document.getElementById("vip").innerText = vipTexto;
 
