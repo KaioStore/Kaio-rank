@@ -96,17 +96,23 @@ function pegarID() {
   return url.searchParams.get("id");
 }
 
-/* PERFIL */
+/* 🔥 PERFIL (CORRIGIDO SEM REMOVER NADA) */
 async function carregarPerfil(id) {
   try {
     const res = await fetch(API + "/perfil/" + id);
+
+    // 🔥 NOVO: evita tela branca
+    if (!res.ok) {
+      throw new Error("Erro na API");
+    }
+
     const data = await res.json();
 
     if (data && data.nome) {
-      document.getElementById("avatar").src = data.avatar;
-      document.getElementById("nome").innerText = data.nome;
-      document.getElementById("total").innerText = "R$" + data.total;
-      document.getElementById("vip").innerText = data.vip;
+      document.getElementById("avatar").src = data.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+      document.getElementById("nome").innerText = data.nome || "Sem nome";
+      document.getElementById("total").innerText = "R$" + (data.total || 0);
+      document.getElementById("vip").innerText = data.vip || "Nenhum";
 
       if (data.posicao) {
         document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
@@ -114,18 +120,32 @@ async function carregarPerfil(id) {
 
       return;
     }
-  } catch {}
 
-  document.getElementById("nome").innerText = "Usuário não encontrado";
-  document.getElementById("avatar").src = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-  document.getElementById("total").innerText = "R$0";
-  document.getElementById("vip").innerText = "Nenhum";
+    throw new Error("Sem dados");
+
+  } catch (err) {
+
+    // 🔥 NOVO: evita tela branca TOTAL
+    document.getElementById("perfil").innerHTML = `
+      <div style="margin-top:50px;">
+        <h2>Erro ao carregar usuário</h2>
+        <p>ID: ${id}</p>
+        <div class="botao" onclick="voltar()">Voltar ao Ranking</div>
+      </div>
+    `;
+  }
 }
 
 /* RANKING */
 async function carregarRanking() {
   try {
     const res = await fetch(API + "/ranking");
+
+    // 🔥 NOVO: evita erro silencioso
+    if (!res.ok) {
+      throw new Error("Erro ranking");
+    }
+
     const data = await res.json();
 
     const div = document.getElementById("ranking");
@@ -163,8 +183,13 @@ function loginDiscord() {
     "&redirect_uri=" + encodeURIComponent(window.location.origin + "?reload=1");
 }
 
-/* 🔥 NOVO: atualiza ranking quando volta pro site */
+/* 🔥 NOVO: atualiza ranking ao voltar pro site */
 window.addEventListener("focus", () => {
+  if (!pegarID()) carregarRanking();
+});
+
+/* 🔥 NOVO: força atualizar depois de navegação */
+window.addEventListener("pageshow", () => {
   if (!pegarID()) carregarRanking();
 });
 
