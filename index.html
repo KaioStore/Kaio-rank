@@ -12,7 +12,6 @@ body {
   color: white;
 }
 
-/* HEADER MAIOR */
 header {
   display: flex;
   justify-content: space-between;
@@ -33,7 +32,6 @@ header {
   font-size: 18px;
 }
 
-/* CENTRALIZA MELHOR */
 .container {
   display: flex;
   flex-direction: column;
@@ -43,7 +41,6 @@ header {
   text-align: center;
 }
 
-/* AVATAR */
 .avatar {
   width: 180px;
   height: 180px;
@@ -52,20 +49,17 @@ header {
   margin-bottom: 10px;
 }
 
-/* NOME */
 .nome {
   font-size: 34px;
   font-weight: bold;
 }
 
-/* POSIÇÃO */
 .posicao {
   color: gold;
   font-size: 20px;
   margin-bottom: 20px;
 }
 
-/* CARDS */
 .card {
   width: 92%;
   max-width: 480px;
@@ -84,16 +78,15 @@ header {
   background: linear-gradient(45deg, #8a6d1d, #cfa62f);
 }
 
-/* BOTÃO */
 .botao {
-  margin-top: 15px;
-  width: 92%;
-  max-width: 480px;
-  padding: 20px;
-  border-radius: 14px;
+  margin-top: 18px;
+  width: 95%;
+  max-width: 600px;
+  padding: 22px;
+  border-radius: 16px;
   background: #3d5c86;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 22px;
   text-align: center;
 }
 
@@ -144,7 +137,6 @@ header {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
-// 🔥 PEGAR TOKEN DO DISCORD
 function pegarToken() {
   const hash = window.location.hash;
 
@@ -153,7 +145,6 @@ function pegarToken() {
     const token = params.get("access_token");
 
     localStorage.setItem("discord_token", token);
-
     window.location.hash = "";
     return token;
   }
@@ -161,7 +152,6 @@ function pegarToken() {
   return localStorage.getItem("discord_token");
 }
 
-// 🔥 PEGAR USUÁRIO
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
   if (!token) return;
@@ -176,7 +166,6 @@ async function pegarUsuarioDiscord() {
 
   document.querySelector(".login").innerText = user.username;
 
-  // 🔥 ADICIONADO: REDIRECIONAR PRO PERFIL AUTOMÁTICO
   if (!window.location.search.includes("id=")) {
     window.location.href = "?id=" + user.id;
   }
@@ -190,6 +179,11 @@ function pegarID() {
 async function carregarPerfil(id) {
   const res = await fetch(API + "/perfil/" + id);
   const data = await res.json();
+
+  if (!data || !data.nome) {
+    voltar();
+    return;
+  }
 
   document.getElementById("avatar").src = data.avatar;
   document.getElementById("nome").innerText = data.nome;
@@ -224,7 +218,6 @@ function voltar() {
   window.location.href = "/";
 }
 
-/* LOGIN DISCORD */
 function loginDiscord() {
   window.location.href =
     "https://discord.com/oauth2/authorize" +
@@ -244,9 +237,7 @@ if (id) {
   carregarRanking();
 }
 
-// 🔥 LOGIN DISCORD ATIVO
 pegarUsuarioDiscord();
-
 </script>
 
 </body>
