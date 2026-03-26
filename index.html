@@ -9,7 +9,7 @@ body {
   margin: 0;
   font-family: Arial;
   color: white;
-  background: linear-gradient(180deg, #0a2540, #000);
+  background: #0a2540; /* 🔥 fundo liso */
   text-align: center;
 }
 
@@ -20,7 +20,7 @@ body {
 }
 
 .botao {
-  background: #2a3f5f;
+  background: #243a5a;
   padding: 10px 15px;
   border-radius: 10px;
   cursor: pointer;
@@ -28,12 +28,6 @@ body {
 
 #menu {
   display: none;
-  position: absolute;
-  right: 20px;
-  top: 70px;
-  background: #2a3f5f;
-  padding: 10px;
-  border-radius: 10px;
 }
 
 .perfil-box {
@@ -55,11 +49,11 @@ body {
 }
 
 .card-azul {
-  background: #2a3f5f;
+  background: #243a5a;
 }
 
 .card-dourado {
-  background: linear-gradient(90deg, #a67c00, #ffcc00);
+  background: #c9a227;
   color: black;
 }
 
@@ -119,6 +113,7 @@ const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
 let usuarioLogado = null;
 
+/* TOKEN */
 function pegarToken() {
   const hash = window.location.hash;
 
@@ -135,23 +130,16 @@ function pegarToken() {
   return localStorage.getItem("discord_token");
 }
 
+/* LOGIN */
 function atualizarBotaoLogin(user) {
   const btn = document.getElementById("loginText");
-  const menu = document.getElementById("menu");
 
-  if (!btn || !menu) return;
+  if (!btn) return;
 
   if (user) {
-    btn.innerText = "Minha Conta";
-    menu.innerHTML = `
-      <div style="margin-bottom:8px;">${user.username}</div>
-      <div onclick="logout()">Sair</div>
-    `;
+    btn.innerText = user.username; // 🔥 só nome (sem menu feio)
   } else {
     btn.innerText = "Login";
-    menu.innerHTML = `
-      <div onclick="loginDiscord()">Entrar com Discord</div>
-    `;
   }
 }
 
@@ -160,18 +148,18 @@ function logout() {
   location.reload();
 }
 
+/* MENU */
 function toggleMenu() {
   const token = localStorage.getItem("discord_token");
 
   if (!token) {
     loginDiscord();
-    return;
+  } else {
+    logout(); // 🔥 clicou logado = sai direto
   }
-
-  const menu = document.getElementById("menu");
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
+/* DISCORD USER */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
 
@@ -194,11 +182,13 @@ async function pegarUsuarioDiscord() {
   }
 }
 
+/* ID */
 function pegarID() {
   const url = new URL(window.location.href);
   return url.searchParams.get("id");
 }
 
+/* PERFIL */
 async function carregarPerfil(id) {
   try {
     const res = await fetch(API + "/perfil/" + id);
@@ -215,6 +205,7 @@ async function carregarPerfil(id) {
   }
 }
 
+/* RANKING */
 async function carregarRanking() {
   try {
     const res = await fetch(API + "/ranking");
@@ -236,6 +227,7 @@ async function carregarRanking() {
   }
 }
 
+/* NAV */
 function abrir(id) {
   window.location.href = "?id=" + id;
 }
@@ -244,6 +236,7 @@ function voltar() {
   window.location.href = "/";
 }
 
+/* LOGIN DISCORD */
 function loginDiscord() {
   window.location.href =
     "https://discord.com/oauth2/authorize" +
@@ -253,6 +246,7 @@ function loginDiscord() {
     "&redirect_uri=" + encodeURIComponent(window.location.origin);
 }
 
+/* START */
 window.addEventListener("DOMContentLoaded", () => {
 
   const id = pegarID();
