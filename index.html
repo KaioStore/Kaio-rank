@@ -1,218 +1,120 @@
-<script>
-const API = "https://attractive-analysis-production-b8e2.up.railway.app";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ranking</title>
 
-let usuarioLogado = null;
-
-/* 🔥 NOVO: FORÇA RELOAD APÓS LOGIN */
-if (window.location.search.includes("reload")) {
-  window.location.href = "/";
-}
-
-/* TOKEN */
-function pegarToken() {
-  const hash = window.location.hash;
-
-  if (hash.includes("access_token")) {
-    const params = new URLSearchParams(hash.substring(1));
-    const token = params.get("access_token");
-
-    localStorage.setItem("discord_token", token);
-    window.location.hash = "";
-
-    window.location.href = "?reload=1";
-    return token;
-  }
-
-  return localStorage.getItem("discord_token");
-}
-
-/* LOGIN / LOGOUT */
-function atualizarBotaoLogin(user) {
-  const btn = document.getElementById("loginText");
-  const menu = document.getElementById("menu");
-
-  if (!btn || !menu) return; // 🔥 proteção
-
-  if (user) {
-    btn.innerText = "Minha Conta";
-    menu.innerHTML = `
-      <div style="margin-bottom:8px;">${user.username}</div>
-      <div onclick="logout()">Remover conta</div>
-    `;
-  } else {
-    btn.innerText = "Login";
-    menu.innerHTML = `
-      <div onclick="loginDiscord()">Entrar com Discord</div>
-    `;
-  }
-}
-
-function logout() {
-  localStorage.removeItem("discord_token");
-  location.reload();
-}
-
-/* MENU */
-function toggleMenu() {
-  const token = localStorage.getItem("discord_token");
-
-  if (!token) {
-    loginDiscord();
-    return;
-  }
-
-  const menu = document.getElementById("menu");
-  if (!menu) return;
-
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-
-/* PEGAR DISCORD */
-async function pegarUsuarioDiscord() {
-  const token = pegarToken();
-
-  if (!token) {
-    atualizarBotaoLogin(null);
-    return;
-  }
-
-  try {
-    const res = await fetch("https://discord.com/api/users/@me", {
-      headers: { Authorization: "Bearer " + token }
-    });
-
-    const user = await res.json();
-    usuarioLogado = user;
-
-    atualizarBotaoLogin(user);
-
-  } catch {
-    atualizarBotaoLogin(null);
-  }
-}
-
-/* ID */
-function pegarID() {
-  const url = new URL(window.location.href);
-  return url.searchParams.get("id");
-}
-
-/* 🔥 PERFIL */
-async function carregarPerfil(id) {
-  try {
-    const res = await fetch(API + "/perfil/" + id);
-
-    if (!res.ok) throw new Error("Erro API");
-
-    const data = await res.json();
-
-    if (!data || data.erro) throw new Error("Sem dados");
-
-    const avatar = document.getElementById("avatar");
-    const nome = document.getElementById("nome");
-    const total = document.getElementById("total");
-    const vip = document.getElementById("vip");
-    const posicao = document.getElementById("posicao");
-
-    if (!avatar || !nome || !total || !vip) return; // 🔥 proteção
-
-    avatar.src = data.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-    nome.innerText = data.nome || "Sem nome";
-    total.innerText = "R$" + (data.total || 0);
-    vip.innerText = data.vip || "Nenhum";
-
-    if (posicao && data.posicao) {
-      posicao.innerText = "#" + data.posicao + " no ranking";
+  <style>
+    body {
+      background: #0d0d0d;
+      color: white;
+      font-family: Arial;
+      text-align: center;
     }
 
-  } catch (err) {
+    .item {
+      background: #1a1a1a;
+      margin: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
 
-    const perfil = document.getElementById("perfil");
-    if (!perfil) return;
+    .item:hover {
+      background: #2a2a2a;
+    }
 
-    perfil.innerHTML = `
-      <div style="margin-top:50px;">
-        <h2>Erro ao carregar usuário</h2>
-        <p>ID: ${id}</p>
-        <div class="botao" onclick="voltar()">Voltar ao Ranking</div>
-      </div>
-    `;
+    img {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Ranking</h1>
+
+  <!-- 🔥 RANKING -->
+  <div id="ranking"></div>
+
+  <!-- 🔥 PERFIL -->
+  <div id="perfil">
+    <img id="avatar" width="100" style="border-radius:50%">
+    <h1 id="nome"></h1>
+    <p id="total"></p>
+    <p id="vip"></p>
+    <p id="posicao"></p>
+
+    <div onclick="voltar()" style="margin-top:20px; cursor:pointer;">
+      ← Voltar
+    </div>
+  </div>
+
+  <!-- 🔥 SCRIPT (SEMPRE NO FINAL) -->
+  <script>
+  const API = "https://attractive-analysis-production-b8e2.up.railway.app";
+
+  function pegarID() {
+    const url = new URL(window.location.href);
+    return url.searchParams.get("id");
   }
-}
 
-/* RANKING */
-async function carregarRanking() {
-  try {
-    const res = await fetch(API + "/ranking");
+  async function carregarPerfil(id) {
+    try {
+      const res = await fetch(API + "/perfil/" + id);
+      const data = await res.json();
 
-    if (!res.ok) throw new Error("Erro ranking");
+      document.getElementById("avatar").src = data.avatar;
+      document.getElementById("nome").innerText = data.nome;
+      document.getElementById("total").innerText = "R$" + data.total;
+      document.getElementById("vip").innerText = data.vip;
+      document.getElementById("posicao").innerText = "#" + data.posicao;
 
-    const data = await res.json();
-
-    const div = document.getElementById("ranking");
-    if (!div) return; // 🔥 proteção
-
-    div.innerHTML = "";
-
-    data.forEach((user, i) => {
-      div.innerHTML += `
-        <div class="item" onclick="abrir('${user.id}')">
-          ${i+1}. ${user.nome} - R$${user.total}
-        </div>
-      `;
-    });
-
-  } catch {
-    const div = document.getElementById("ranking");
-    if (div) div.innerText = "Erro ao carregar ranking";
+    } catch {
+      document.getElementById("perfil").innerText = "Erro ao carregar";
+    }
   }
-}
 
-/* NAVEGAÇÃO */
-function abrir(id) {
-  window.location.href = "?id=" + id;
-}
+  async function carregarRanking() {
+    try {
+      const res = await fetch(API + "/ranking");
+      const data = await res.json();
 
-function voltar() {
-  window.location.href = "/";
-}
+      const div = document.getElementById("ranking");
+      div.innerHTML = "";
 
-/* LOGIN */
-function loginDiscord() {
-  window.location.href =
-    "https://discord.com/oauth2/authorize" +
-    "?client_id=1485623307364466861" +
-    "&response_type=token" +
-    "&scope=identify" +
-    "&redirect_uri=" + encodeURIComponent(window.location.origin + "?reload=1");
-}
+      data.forEach((user, i) => {
+        div.innerHTML += `
+          <div class="item" onclick="abrir('${user.id}')">
+            ${i+1}. ${user.nome} - R$${user.total}
+          </div>
+        `;
+      });
 
-/* 🔥 ATUALIZAÇÃO AUTOMÁTICA */
-window.addEventListener("focus", () => {
-  if (!pegarID()) carregarRanking();
-});
+    } catch {
+      document.getElementById("ranking").innerText = "Erro ao carregar ranking";
+    }
+  }
 
-window.addEventListener("pageshow", () => {
-  if (!pegarID()) carregarRanking();
-});
+  function abrir(id) {
+    window.location.href = "?id=" + id;
+  }
 
-/* 🔥 GARANTE QUE O DOM CARREGOU */
-window.addEventListener("DOMContentLoaded", () => {
+  function voltar() {
+    window.location.href = "/";
+  }
 
+  // 🔥 INICIO
   const id = pegarID();
 
   if (id) {
-    const ranking = document.getElementById("ranking");
-    if (ranking) ranking.style.display = "none";
-
+    document.getElementById("ranking").style.display = "none";
     carregarPerfil(id);
   } else {
-    const perfil = document.getElementById("perfil");
-    if (perfil) perfil.style.display = "none";
-
+    document.getElementById("perfil").style.display = "none";
     carregarRanking();
   }
+  </script>
 
-  pegarUsuarioDiscord();
-});
-</script>
+</body>
+</html>
