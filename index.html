@@ -19,7 +19,6 @@ function pegarToken() {
     localStorage.setItem("discord_token", token);
     window.location.hash = "";
 
-    // 🔥 NOVO: força reload após login
     window.location.href = "?reload=1";
     return token;
   }
@@ -31,6 +30,8 @@ function pegarToken() {
 function atualizarBotaoLogin(user) {
   const btn = document.getElementById("loginText");
   const menu = document.getElementById("menu");
+
+  if (!btn || !menu) return; // 🔥 proteção
 
   if (user) {
     btn.innerText = "Minha Conta";
@@ -48,8 +49,6 @@ function atualizarBotaoLogin(user) {
 
 function logout() {
   localStorage.removeItem("discord_token");
-
-  // 🔥 NOVO: recarrega automaticamente
   location.reload();
 }
 
@@ -63,6 +62,8 @@ function toggleMenu() {
   }
 
   const menu = document.getElementById("menu");
+  if (!menu) return;
+
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
@@ -96,37 +97,40 @@ function pegarID() {
   return url.searchParams.get("id");
 }
 
-/* 🔥 PERFIL (CORRIGIDO SEM REMOVER NADA) */
+/* 🔥 PERFIL */
 async function carregarPerfil(id) {
   try {
     const res = await fetch(API + "/perfil/" + id);
 
-    // 🔥 NOVO: evita tela branca
-    if (!res.ok) {
-      throw new Error("Erro na API");
-    }
+    if (!res.ok) throw new Error("Erro API");
 
     const data = await res.json();
 
-    if (data && data.nome) {
-      document.getElementById("avatar").src = data.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-      document.getElementById("nome").innerText = data.nome || "Sem nome";
-      document.getElementById("total").innerText = "R$" + (data.total || 0);
-      document.getElementById("vip").innerText = data.vip || "Nenhum";
+    if (!data || data.erro) throw new Error("Sem dados");
 
-      if (data.posicao) {
-        document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
-      }
+    const avatar = document.getElementById("avatar");
+    const nome = document.getElementById("nome");
+    const total = document.getElementById("total");
+    const vip = document.getElementById("vip");
+    const posicao = document.getElementById("posicao");
 
-      return;
+    if (!avatar || !nome || !total || !vip) return; // 🔥 proteção
+
+    avatar.src = data.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    nome.innerText = data.nome || "Sem nome";
+    total.innerText = "R$" + (data.total || 0);
+    vip.innerText = data.vip || "Nenhum";
+
+    if (posicao && data.posicao) {
+      posicao.innerText = "#" + data.posicao + " no ranking";
     }
-
-    throw new Error("Sem dados");
 
   } catch (err) {
 
-    // 🔥 NOVO: evita tela branca TOTAL
-    document.getElementById("perfil").innerHTML = `
+    const perfil = document.getElementById("perfil");
+    if (!perfil) return;
+
+    perfil.innerHTML = `
       <div style="margin-top:50px;">
         <h2>Erro ao carregar usuário</h2>
         <p>ID: ${id}</p>
@@ -141,14 +145,13 @@ async function carregarRanking() {
   try {
     const res = await fetch(API + "/ranking");
 
-    // 🔥 NOVO: evita erro silencioso
-    if (!res.ok) {
-      throw new Error("Erro ranking");
-    }
+    if (!res.ok) throw new Error("Erro ranking");
 
     const data = await res.json();
 
     const div = document.getElementById("ranking");
+    if (!div) return; // 🔥 proteção
+
     div.innerHTML = "";
 
     data.forEach((user, i) => {
@@ -160,7 +163,8 @@ async function carregarRanking() {
     });
 
   } catch {
-    document.getElementById("ranking").innerText = "Erro ao carregar ranking";
+    const div = document.getElementById("ranking");
+    if (div) div.innerText = "Erro ao carregar ranking";
   }
 }
 
@@ -183,26 +187,32 @@ function loginDiscord() {
     "&redirect_uri=" + encodeURIComponent(window.location.origin + "?reload=1");
 }
 
-/* 🔥 NOVO: atualiza ranking ao voltar pro site */
+/* 🔥 ATUALIZAÇÃO AUTOMÁTICA */
 window.addEventListener("focus", () => {
   if (!pegarID()) carregarRanking();
 });
 
-/* 🔥 NOVO: força atualizar depois de navegação */
 window.addEventListener("pageshow", () => {
   if (!pegarID()) carregarRanking();
 });
 
-/* INICIO */
-const id = pegarID();
+/* 🔥 GARANTE QUE O DOM CARREGOU */
+window.addEventListener("DOMContentLoaded", () => {
 
-if (id) {
-  document.getElementById("ranking").style.display = "none";
-  carregarPerfil(id);
-} else {
-  document.getElementById("perfil").style.display = "none";
-  carregarRanking();
-}
+  const id = pegarID();
 
-pegarUsuarioDiscord();
+  if (id) {
+    const ranking = document.getElementById("ranking");
+    if (ranking) ranking.style.display = "none";
+
+    carregarPerfil(id);
+  } else {
+    const perfil = document.getElementById("perfil");
+    if (perfil) perfil.style.display = "none";
+
+    carregarRanking();
+  }
+
+  pegarUsuarioDiscord();
+});
 </script>
