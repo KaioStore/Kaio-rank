@@ -61,13 +61,12 @@ header {
 }
 
 .card {
-  width: 92%;
-  max-width: 480px;
-  padding: 24px;
-  border-radius: 18px;
-  margin: 6px 0;
+  width: 96%; /* 🔥 AUMENTADO DE VERDADE */
+  padding: 28px;
+  border-radius: 20px;
+  margin: 10px 0;
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .gasto {
@@ -152,6 +151,19 @@ function pegarToken() {
   return localStorage.getItem("discord_token");
 }
 
+/* 🔥 NOVO: FUNÇÃO PRA MOSTRAR DADOS DO DISCORD */
+function mostrarDiscord(user) {
+  document.getElementById("nome").innerText = user.username;
+
+  if (user.avatar) {
+    document.getElementById("avatar").src =
+      `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+  }
+
+  document.getElementById("posicao").innerText = "Conta conectada";
+}
+
+/* 🔥 ATUALIZADA */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
   if (!token) return;
@@ -164,8 +176,19 @@ async function pegarUsuarioDiscord() {
 
   const user = await res.json();
 
-  document.querySelector(".login").innerText = user.username;
+  const botao = document.querySelector(".login");
+  botao.innerText = user.username;
 
+  // 🔥 LOGOUT AO CLICAR
+  botao.onclick = () => {
+    localStorage.removeItem("discord_token");
+    location.reload();
+  };
+
+  // 🔥 MOSTRA DADOS SEM API
+  mostrarDiscord(user);
+
+  // 🔥 REDIRECIONA PRO PERFIL
   if (!window.location.search.includes("id=")) {
     window.location.href = "?id=" + user.id;
   }
@@ -176,22 +199,24 @@ function pegarID() {
   return url.searchParams.get("id");
 }
 
+/* 🔥 MELHORADO */
 async function carregarPerfil(id) {
-  const res = await fetch(API + "/perfil/" + id);
-  const data = await res.json();
+  try {
+    const res = await fetch(API + "/perfil/" + id);
+    const data = await res.json();
 
-  if (!data || !data.nome) {
-    voltar();
-    return;
-  }
+    if (data && data.nome) {
+      document.getElementById("avatar").src = data.avatar;
+      document.getElementById("nome").innerText = data.nome;
+      document.getElementById("total").innerText = "R$" + data.total;
+      document.getElementById("vip").innerText = data.vip;
 
-  document.getElementById("avatar").src = data.avatar;
-  document.getElementById("nome").innerText = data.nome;
-  document.getElementById("total").innerText = "R$" + data.total;
-  document.getElementById("vip").innerText = data.vip;
-
-  if (data.posicao) {
-    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
+      if (data.posicao) {
+        document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
+      }
+    }
+  } catch (e) {
+    console.log("API falhou, usando Discord");
   }
 }
 
