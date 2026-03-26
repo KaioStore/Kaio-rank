@@ -8,19 +8,17 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #0b0b0b;
+  background: linear-gradient(180deg, #0a0a0a, #111);
   color: white;
   text-align: center;
 }
 
 /* TOPO */
 .topo {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 20px;
-  font-size: 26px;
+  padding: 25px;
+  font-size: 32px;
   font-weight: bold;
+  letter-spacing: 1px;
 }
 
 /* PERFIL */
@@ -30,51 +28,58 @@ body {
 
 /* AVATAR */
 #avatar {
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   border: 3px solid #333;
+  transition: 0.3s;
+}
+
+#avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(255,255,255,0.15);
 }
 
 /* NOME */
 #nome {
   margin-top: 15px;
-  font-size: 26px;
+  font-size: 28px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.15);
 }
 
 /* POSIÇÃO */
 #posicao {
   color: #aaa;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 /* CARDS */
 .card {
-  width: 85%;
-  max-width: 420px;
+  width: 90%;
+  max-width: 440px;
   margin: 15px auto;
-  padding: 20px;
+  padding: 22px;
   border-radius: 14px;
   font-size: 18px;
+  transition: 0.25s;
 }
 
-/* CARD PRETO */
+/* PRETO */
 .card-azul {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #141414;
+  border-left: 3px solid #555;
 }
 
-/* CARD CINZA */
+/* CINZA */
 .card-dourado {
-  background: #222;
-  border: 1px solid #333;
+  background: #1c1c1c;
+  border-left: 3px solid #777;
 }
 
 /* HOVER PREMIUM */
 .card:hover {
-  box-shadow: 0 0 20px rgba(255,255,255,0.05);
-  transform: scale(1.02);
-  transition: 0.2s;
+  transform: scale(1.03);
+  box-shadow: 0 0 25px rgba(255,255,255,0.06);
 }
 </style>
 
@@ -129,7 +134,7 @@ async function carregarPerfil(id) {
     document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
 
   } catch {
-    document.getElementById("perfil").innerText = "Erro ao carregar";
+    document.getElementById("perfil").innerHTML = "<h2>Erro ao carregar</h2>";
   }
 }
 
