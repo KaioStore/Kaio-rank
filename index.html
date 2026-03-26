@@ -1,172 +1,12 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Kaio Store</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(#071a2f, #020c18);
-  color: white;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 25px 35px;
-  align-items: center;
-}
-
-.logo {
-  font-size: 34px;
-  font-weight: bold;
-}
-
-.login {
-  background: #2b4d7c;
-  padding: 14px 26px;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 18px;
-  position: relative;
-}
-
-/* MENU */
-.menu {
-  position: absolute;
-  top: 60px;
-  right: 0;
-  background: #1a2f4d;
-  border-radius: 10px;
-  display: none;
-  padding: 10px;
-}
-
-.menu div {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.menu div:hover {
-  background: #2b4d7c;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 60px;
-  text-align: center;
-}
-
-.avatar {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  border: 6px solid gold;
-  margin-bottom: 10px;
-}
-
-.nome {
-  font-size: 34px;
-  font-weight: bold;
-}
-
-.posicao {
-  color: gold;
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
-/* 🔥 VOLTADO AO TAMANHO NORMAL */
-.card {
-  width: 92%;
-  max-width: 480px;
-  padding: 24px;
-  border-radius: 18px;
-  margin: 6px 0;
-  text-align: center;
-  font-size: 20px;
-}
-
-.gasto {
-  background: #1e3a5f;
-}
-
-.vip {
-  background: linear-gradient(45deg, #8a6d1d, #cfa62f);
-}
-
-.botao {
-  margin-top: 18px;
-  width: 95%;
-  max-width: 600px;
-  padding: 20px;
-  border-radius: 16px;
-  background: #3d5c86;
-  cursor: pointer;
-  font-size: 20px;
-  text-align: center;
-}
-
-.ranking {
-  margin-top: 40px;
-  text-align: center;
-}
-
-.item {
-  margin: 10px auto;
-  padding: 14px;
-  width: 92%;
-  max-width: 480px;
-  background: #1a2f4d;
-  border-radius: 12px;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-  <div class="logo">Kaio Store</div>
-
-  <div class="login" onclick="toggleMenu()">
-    <span id="loginText">Minha Conta</span>
-    
-    <div class="menu" id="menu">
-      <div onclick="logout()">Remover conta</div>
-    </div>
-  </div>
-</header>
-
-<div class="container" id="perfil">
-  <img class="avatar" id="avatar">
-  <div class="nome" id="nome">Carregando...</div>
-  <div class="posicao" id="posicao"></div>
-
-  <div class="card gasto">
-    💰 Total gasto
-    <div id="total">R$0</div>
-  </div>
-
-  <div class="card vip">
-    👑 VIP atual
-    <div id="vip">Carregando</div>
-  </div>
-
-  <div class="botao" onclick="voltar()">Voltar ao Ranking</div>
-</div>
-
-<div class="ranking" id="ranking"></div>
-
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
 let usuarioLogado = null;
+
+/* 🔥 NOVO: FORÇA RELOAD APÓS LOGIN */
+if (window.location.search.includes("reload")) {
+  window.location.href = "/";
+}
 
 /* TOKEN */
 function pegarToken() {
@@ -178,6 +18,9 @@ function pegarToken() {
 
     localStorage.setItem("discord_token", token);
     window.location.hash = "";
+
+    // 🔥 NOVO: força reload após login
+    window.location.href = "?reload=1";
     return token;
   }
 
@@ -205,14 +48,15 @@ function atualizarBotaoLogin(user) {
 
 function logout() {
   localStorage.removeItem("discord_token");
-  location.href = "/";
+
+  // 🔥 NOVO: recarrega automaticamente
+  location.reload();
 }
 
 /* MENU */
 function toggleMenu() {
   const token = localStorage.getItem("discord_token");
 
-  // 🔥 se não tiver logado → abre login direto
   if (!token) {
     loginDiscord();
     return;
@@ -272,7 +116,6 @@ async function carregarPerfil(id) {
     }
   } catch {}
 
-  /* FALLBACK */
   document.getElementById("nome").innerText = "Usuário não encontrado";
   document.getElementById("avatar").src = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   document.getElementById("total").innerText = "R$0";
@@ -317,8 +160,13 @@ function loginDiscord() {
     "?client_id=1485623307364466861" +
     "&response_type=token" +
     "&scope=identify" +
-    "&redirect_uri=" + encodeURIComponent(window.location.origin);
+    "&redirect_uri=" + encodeURIComponent(window.location.origin + "?reload=1");
 }
+
+/* 🔥 NOVO: atualiza ranking quando volta pro site */
+window.addEventListener("focus", () => {
+  if (!pegarID()) carregarRanking();
+});
 
 /* INICIO */
 const id = pegarID();
@@ -333,6 +181,3 @@ if (id) {
 
 pegarUsuarioDiscord();
 </script>
-
-</body>
-</html>
