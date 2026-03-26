@@ -9,10 +9,11 @@ body {
   margin: 0;
   font-family: Arial;
   color: white;
-  background: #0a2540; /* 🔥 fundo liso */
+  background: #0a2540;
   text-align: center;
 }
 
+/* TOPO */
 .topo {
   display: flex;
   justify-content: space-between;
@@ -26,10 +27,28 @@ body {
   cursor: pointer;
 }
 
+/* MENU LOGIN */
 #menu {
   display: none;
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  background: #243a5a;
+  padding: 10px;
+  border-radius: 10px;
 }
 
+/* RANKING CARDS GRANDES */
+.item {
+  background: #1a2c44;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 15px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* PERFIL */
 .perfil-box {
   margin-top: 30px;
 }
@@ -43,7 +62,7 @@ body {
 .card {
   margin: 20px auto;
   width: 80%;
-  max-width: 300px;
+  max-width: 320px;
   padding: 20px;
   border-radius: 15px;
 }
@@ -55,14 +74,6 @@ body {
 .card-dourado {
   background: #c9a227;
   color: black;
-}
-
-.item {
-  background: #1a2c44;
-  margin: 10px;
-  padding: 15px;
-  border-radius: 10px;
-  cursor: pointer;
 }
 </style>
 
@@ -85,7 +96,7 @@ body {
 <div id="ranking"></div>
 
 <!-- PERFIL -->
-<div id="perfil" class="perfil-box">
+<div id="perfil" class="perfil-box" style="display:none;">
 
   <img id="avatar">
 
@@ -111,8 +122,6 @@ body {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
-let usuarioLogado = null;
-
 /* TOKEN */
 function pegarToken() {
   const hash = window.location.hash;
@@ -123,7 +132,7 @@ function pegarToken() {
 
     localStorage.setItem("discord_token", token);
     window.location.hash = "";
-    window.location.href = "?reload=1";
+    location.reload();
     return token;
   }
 
@@ -133,13 +142,23 @@ function pegarToken() {
 /* LOGIN */
 function atualizarBotaoLogin(user) {
   const btn = document.getElementById("loginText");
+  const menu = document.getElementById("menu");
 
-  if (!btn) return;
+  if (!btn || !menu) return;
 
   if (user) {
-    btn.innerText = user.username; // 🔥 só nome (sem menu feio)
+    btn.innerText = "Minha Conta";
+
+    menu.innerHTML = `
+      <div style="margin-bottom:8px;">${user.username}</div>
+      <div onclick="logout()">Sair</div>
+    `;
   } else {
     btn.innerText = "Login";
+
+    menu.innerHTML = `
+      <div onclick="loginDiscord()">Entrar com Discord</div>
+    `;
   }
 }
 
@@ -150,16 +169,16 @@ function logout() {
 
 /* MENU */
 function toggleMenu() {
-  const token = localStorage.getItem("discord_token");
+  const menu = document.getElementById("menu");
 
-  if (!token) {
-    loginDiscord();
+  if (menu.style.display === "block") {
+    menu.style.display = "none";
   } else {
-    logout(); // 🔥 clicou logado = sai direto
+    menu.style.display = "block";
   }
 }
 
-/* DISCORD USER */
+/* PEGAR DISCORD */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
 
@@ -174,9 +193,8 @@ async function pegarUsuarioDiscord() {
     });
 
     const user = await res.json();
-    usuarioLogado = user;
-
     atualizarBotaoLogin(user);
+
   } catch {
     atualizarBotaoLogin(null);
   }
@@ -190,41 +208,34 @@ function pegarID() {
 
 /* PERFIL */
 async function carregarPerfil(id) {
-  try {
-    const res = await fetch(API + "/perfil/" + id);
-    const data = await res.json();
+  document.getElementById("ranking").style.display = "none";
+  document.getElementById("perfil").style.display = "block";
 
-    document.getElementById("avatar").src = data.avatar;
-    document.getElementById("nome").innerText = data.nome;
-    document.getElementById("total").innerText = "R$" + data.total;
-    document.getElementById("vip").innerText = data.vip;
-    document.getElementById("posicao").innerText = "#" + data.posicao;
+  const res = await fetch(API + "/perfil/" + id);
+  const data = await res.json();
 
-  } catch {
-    document.getElementById("perfil").innerText = "Erro ao carregar";
-  }
+  document.getElementById("avatar").src = data.avatar;
+  document.getElementById("nome").innerText = data.nome;
+  document.getElementById("total").innerText = "R$" + data.total;
+  document.getElementById("vip").innerText = data.vip;
+  document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
 }
 
 /* RANKING */
 async function carregarRanking() {
-  try {
-    const res = await fetch(API + "/ranking");
-    const data = await res.json();
+  const res = await fetch(API + "/ranking");
+  const data = await res.json();
 
-    const div = document.getElementById("ranking");
-    div.innerHTML = "";
+  const div = document.getElementById("ranking");
+  div.innerHTML = "";
 
-    data.forEach((user, i) => {
-      div.innerHTML += `
-        <div class="item" onclick="abrir('${user.id}')">
-          ${i+1}. ${user.nome} - R$${user.total}
-        </div>
-      `;
-    });
-
-  } catch {
-    document.getElementById("ranking").innerText = "Erro ao carregar ranking";
-  }
+  data.forEach((user, i) => {
+    div.innerHTML += `
+      <div class="item" onclick="abrir('${user.id}')">
+        ${i+1}. ${user.nome} - R$${user.total}
+      </div>
+    `;
+  });
 }
 
 /* NAV */
@@ -252,10 +263,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const id = pegarID();
 
   if (id) {
-    document.getElementById("ranking").style.display = "none";
     carregarPerfil(id);
   } else {
-    document.getElementById("perfil").style.display = "none";
     carregarRanking();
   }
 
