@@ -2,80 +2,90 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Perfil</title>
+<title>Kaio Store</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial;
-  background: #0a2540;
+  background: linear-gradient(180deg, #0a0a0a, #111827);
   color: white;
-  text-align: center;
 }
 
 /* TOPO */
 .topo {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 20px;
 }
 
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
 .botao {
-  background: #243a5a;
-  padding: 10px 15px;
-  border-radius: 10px;
+  background: #1f2937;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 /* MENU */
 #menu {
-  display: none;
   position: absolute;
   right: 20px;
   top: 70px;
-  background: #243a5a;
-  padding: 10px;
+  background: #111827;
   border-radius: 10px;
+  padding: 10px;
+  display: none;
 }
 
 /* PERFIL */
 .perfil-box {
+  text-align: center;
   margin-top: 40px;
 }
 
 #avatar {
   width: 120px;
   border-radius: 50%;
-  border: 4px solid gold;
+  border: 3px solid gold;
 }
 
-/* CARDS */
+#nome {
+  margin: 10px 0;
+}
+
+/* CARDS GRANDES */
 .card {
-  margin: 20px auto;
-  width: 90%;
+  width: 85%;
   max-width: 400px;
+  margin: 20px auto;
   padding: 25px;
-  border-radius: 18px;
+  border-radius: 12px;
   font-size: 18px;
 }
 
 .card-azul {
-  background: #243a5a;
+  background: #1f2937;
 }
 
 .card-dourado {
-  background: #c9a227;
+  background: #b48a1e;
   color: black;
 }
-</style>
 
+</style>
 </head>
 
 <body>
 
 <!-- TOPO -->
 <div class="topo">
-  <div></div>
+  <div class="logo">Kaio Store</div>
 
   <div onclick="toggleMenu()" class="botao" id="loginText">
     Login
@@ -107,6 +117,8 @@ body {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
+let usuarioLogado = null;
+
 /* TOKEN */
 function pegarToken() {
   const hash = window.location.hash;
@@ -116,53 +128,46 @@ function pegarToken() {
     const token = params.get("access_token");
 
     localStorage.setItem("discord_token", token);
-
-    // remove bug de reload
-    window.history.replaceState({}, document.title, "/");
-
+    window.location.hash = "";
+    window.location.reload();
     return token;
   }
 
   return localStorage.getItem("discord_token");
 }
 
-/* LOGIN */
+/* LOGIN BOTÃO */
 function atualizarBotaoLogin(user) {
   const btn = document.getElementById("loginText");
   const menu = document.getElementById("menu");
 
-  if (!btn || !menu) return;
-
   if (user) {
     btn.innerText = "Minha Conta";
-
     menu.innerHTML = `
-      <div style="margin-bottom:8px;">${user.username}</div>
+      <div>${user.username}</div>
       <div onclick="logout()">Sair</div>
     `;
   } else {
     btn.innerText = "Login";
-
     menu.innerHTML = `
       <div onclick="loginDiscord()">Entrar com Discord</div>
     `;
   }
 }
 
+/* MENU */
+function toggleMenu() {
+  const menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+/* LOGOUT */
 function logout() {
   localStorage.removeItem("discord_token");
   location.reload();
 }
 
-/* MENU */
-function toggleMenu() {
-  const menu = document.getElementById("menu");
-
-  menu.style.display =
-    menu.style.display === "block" ? "none" : "block";
-}
-
-/* DISCORD */
+/* PEGAR USER */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
 
@@ -177,25 +182,27 @@ async function pegarUsuarioDiscord() {
     });
 
     const user = await res.json();
-    atualizarBotaoLogin(user);
+    usuarioLogado = user;
 
+    atualizarBotaoLogin(user);
   } catch {
     atualizarBotaoLogin(null);
   }
 }
 
 /* PERFIL */
-async function carregarPerfil(id) {
+async function carregarPerfil() {
   try {
-    const res = await fetch(API + "/perfil/" + id);
+    const res = await fetch(API + "/ranking");
     const data = await res.json();
 
-    document.getElementById("avatar").src = data.avatar;
-    document.getElementById("nome").innerText = data.nome;
-    document.getElementById("total").innerText = "R$" + data.total;
-    document.getElementById("vip").innerText = data.vip;
-    document.getElementById("posicao").innerText =
-      "#" + data.posicao + " no ranking";
+    const top = data[0]; // pega só o primeiro
+
+    document.getElementById("avatar").src = top.avatar;
+    document.getElementById("nome").innerText = top.nome;
+    document.getElementById("total").innerText = "R$" + top.total;
+    document.getElementById("vip").innerText = top.vip;
+    document.getElementById("posicao").innerText = "#1 no ranking";
 
   } catch {
     document.getElementById("perfil").innerText = "Erro ao carregar";
@@ -213,15 +220,10 @@ function loginDiscord() {
 }
 
 /* START */
-window.addEventListener("DOMContentLoaded", () => {
-
-  pegarToken();
-
-  // 🔥 ID FIXO (SEMPRE MOSTRA PERFIL)
-  carregarPerfil("1470520684127191304");
-
+window.onload = () => {
   pegarUsuarioDiscord();
-});
+  carregarPerfil();
+};
 </script>
 
 </body>
