@@ -37,6 +37,7 @@ body {
   border-radius: 20px;
   text-align: center;
   width: 350px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .avatar {
@@ -49,6 +50,7 @@ body {
 
 .nome {
   font-size: 24px;
+  margin-top: 10px;
 }
 
 .rank {
@@ -97,21 +99,16 @@ body {
 <div class="container">
   <div class="card">
 
-    <!-- AVATAR -->
     <img id="avatar" class="avatar">
 
-    <!-- NOME -->
-    <div id="nome" class="nome"></div>
+    <div id="nome" class="nome">Carregando...</div>
 
-    <!-- POSIÇÃO -->
     <div id="rank" class="rank"></div>
 
-    <!-- FRASE -->
     <div class="mensagem">
       Continue comprando para subir no ranking e ganhar benefícios!
     </div>
 
-    <!-- BOXES -->
     <div class="boxes">
       <div class="box gasto">
         Total:<br><b id="total"></b>
@@ -122,7 +119,6 @@ body {
       </div>
     </div>
 
-    <!-- BOTÃO -->
     <div class="voltar" onclick="window.open('https://discord.com')">
       Voltar
     </div>
@@ -134,10 +130,10 @@ body {
 // ===== PEGAR ID =====
 const id = new URLSearchParams(window.location.search).get("id");
 
-// 🔥 API CORRETA (ARRUMADO)
-const API = "https://95ac5103-5343-4fec-9568-e8254095e58b-00-33he6bb385pjr.spock.replit.dev/perfil/";
+// 🔥 COLOCA O LINK DO SEU BOT AQUI
+const API = "https://SEU-BOT.up.railway.app/perfil/";
 
-// ===== SE NÃO TIVER ID =====
+// ===== SEM ID =====
 if (!id) {
   document.getElementById("nome").innerText = "Usuário não encontrado";
 } else {
@@ -151,20 +147,11 @@ if (!id) {
       return;
     }
 
-    // NOME
     document.getElementById("nome").innerText = data.nome;
-
-    // AVATAR
     document.getElementById("avatar").src = data.avatar;
-
-    // TOTAL
     document.getElementById("total").innerText = "R$" + data.total;
+    document.getElementById("vip").innerText = data.vip || "Sem cargo";
 
-    // VIP
-    document.getElementById("vip").innerText =
-      data.vip || "Sem cargo";
-
-    // RANK
     if (data.posicao === 1) {
       document.getElementById("rank").innerText = "#1 👑";
     } else if (data.posicao) {
