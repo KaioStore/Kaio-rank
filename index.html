@@ -26,10 +26,31 @@ header {
 
 .login {
   background: #2b4d7c;
-  padding: 16px 28px;
+  padding: 14px 26px;
   border-radius: 14px;
   cursor: pointer;
   font-size: 18px;
+  position: relative;
+}
+
+/* MENU */
+.menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: #1a2f4d;
+  border-radius: 10px;
+  display: none;
+  padding: 10px;
+}
+
+.menu div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.menu div:hover {
+  background: #2b4d7c;
 }
 
 .container {
@@ -60,13 +81,15 @@ header {
   margin-bottom: 20px;
 }
 
+/* 🔥 VOLTADO AO TAMANHO NORMAL */
 .card {
-  width: 96%; /* 🔥 AUMENTADO DE VERDADE */
-  padding: 28px;
-  border-radius: 20px;
-  margin: 10px 0;
+  width: 92%;
+  max-width: 480px;
+  padding: 24px;
+  border-radius: 18px;
+  margin: 6px 0;
   text-align: center;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .gasto {
@@ -81,11 +104,11 @@ header {
   margin-top: 18px;
   width: 95%;
   max-width: 600px;
-  padding: 22px;
+  padding: 20px;
   border-radius: 16px;
   background: #3d5c86;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 20px;
   text-align: center;
 }
 
@@ -110,7 +133,14 @@ header {
 
 <header>
   <div class="logo">Kaio Store</div>
-  <div class="login" onclick="loginDiscord()">Minha Conta</div>
+
+  <div class="login" onclick="toggleMenu()">
+    <span id="loginText">Minha Conta</span>
+    
+    <div class="menu" id="menu">
+      <div onclick="logout()">Remover conta</div>
+    </div>
+  </div>
 </header>
 
 <div class="container" id="perfil">
@@ -136,6 +166,9 @@ header {
 <script>
 const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
+let usuarioLogado = null;
+
+/* TOKEN */
 function pegarToken() {
   const hash = window.location.hash;
 
@@ -151,19 +184,19 @@ function pegarToken() {
   return localStorage.getItem("discord_token");
 }
 
-/* 🔥 NOVO: FUNÇÃO PRA MOSTRAR DADOS DO DISCORD */
-function mostrarDiscord(user) {
-  document.getElementById("nome").innerText = user.username;
-
-  if (user.avatar) {
-    document.getElementById("avatar").src =
-      `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-  }
-
-  document.getElementById("posicao").innerText = "Conta conectada";
+/* MENU */
+function toggleMenu() {
+  const menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-/* 🔥 ATUALIZADA */
+/* LOGOUT */
+function logout() {
+  localStorage.removeItem("discord_token");
+  location.href = "/";
+}
+
+/* USUÁRIO DISCORD */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
   if (!token) return;
@@ -175,56 +208,41 @@ async function pegarUsuarioDiscord() {
   });
 
   const user = await res.json();
+  usuarioLogado = user;
 
-  const botao = document.querySelector(".login");
-  botao.innerText = user.username;
-
-  // 🔥 LOGOUT AO CLICAR
-  botao.onclick = () => {
-    localStorage.removeItem("discord_token");
-    location.reload();
-  };
-
-  // 🔥 MOSTRA DADOS SEM API
-  mostrarDiscord(user);
-
-  // 🔥 REDIRECIONA PRO PERFIL
-  if (!window.location.search.includes("id=")) {
-    window.location.href = "?id=" + user.id;
-  }
+  document.getElementById("loginText").innerText = user.username;
 }
 
+/* ID */
 function pegarID() {
   const url = new URL(window.location.href);
   return url.searchParams.get("id");
 }
 
-/* 🔥 MELHORADO */
+/* PERFIL */
 async function carregarPerfil(id) {
-  try {
-    const res = await fetch(API + "/perfil/" + id);
-    const data = await res.json();
+  const res = await fetch(API + "/perfil/" + id);
+  const data = await res.json();
 
-    if (data && data.nome) {
-      document.getElementById("avatar").src = data.avatar;
-      document.getElementById("nome").innerText = data.nome;
-      document.getElementById("total").innerText = "R$" + data.total;
-      document.getElementById("vip").innerText = data.vip;
+  if (!data || !data.nome) return;
 
-      if (data.posicao) {
-        document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
-      }
-    }
-  } catch (e) {
-    console.log("API falhou, usando Discord");
+  document.getElementById("avatar").src = data.avatar;
+  document.getElementById("nome").innerText = data.nome;
+  document.getElementById("total").innerText = "R$" + data.total;
+  document.getElementById("vip").innerText = data.vip;
+
+  if (data.posicao) {
+    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
   }
 }
 
+/* RANKING */
 async function carregarRanking() {
   const res = await fetch(API + "/ranking");
   const data = await res.json();
 
   const div = document.getElementById("ranking");
+  div.innerHTML = "";
 
   data.forEach((user, i) => {
     div.innerHTML += `
@@ -235,6 +253,7 @@ async function carregarRanking() {
   });
 }
 
+/* NAVEGAÇÃO */
 function abrir(id) {
   window.location.href = "?id=" + id;
 }
@@ -243,6 +262,7 @@ function voltar() {
   window.location.href = "/";
 }
 
+/* LOGIN */
 function loginDiscord() {
   window.location.href =
     "https://discord.com/oauth2/authorize" +
@@ -252,6 +272,7 @@ function loginDiscord() {
     "&redirect_uri=" + encodeURIComponent(window.location.origin);
 }
 
+/* INICIO */
 const id = pegarID();
 
 if (id) {
