@@ -184,33 +184,51 @@ function pegarToken() {
   return localStorage.getItem("discord_token");
 }
 
+/* LOGIN / LOGOUT */
+function atualizarBotaoLogin(user) {
+  const btn = document.getElementById("loginText");
+
+  if (user) {
+    btn.innerText = user.username;
+    document.getElementById("menu").style.display = "block";
+  } else {
+    btn.innerText = "Minha Conta";
+    document.getElementById("menu").style.display = "none";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("discord_token");
+  location.href = "/";
+}
+
 /* MENU */
 function toggleMenu() {
   const menu = document.getElementById("menu");
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-/* LOGOUT */
-function logout() {
-  localStorage.removeItem("discord_token");
-  location.href = "/";
-}
-
-/* USUÁRIO DISCORD */
+/* PEGAR DISCORD */
 async function pegarUsuarioDiscord() {
   const token = pegarToken();
-  if (!token) return;
+  if (!token) {
+    atualizarBotaoLogin(null);
+    return;
+  }
 
-  const res = await fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: "Bearer " + token
-    }
-  });
+  try {
+    const res = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: "Bearer " + token }
+    });
 
-  const user = await res.json();
-  usuarioLogado = user;
+    const user = await res.json();
+    usuarioLogado = user;
 
-  document.getElementById("loginText").innerText = user.username;
+    atualizarBotaoLogin(user);
+
+  } catch {
+    atualizarBotaoLogin(null);
+  }
 }
 
 /* ID */
@@ -221,36 +239,51 @@ function pegarID() {
 
 /* PERFIL */
 async function carregarPerfil(id) {
-  const res = await fetch(API + "/perfil/" + id);
-  const data = await res.json();
+  try {
+    const res = await fetch(API + "/perfil/" + id);
+    const data = await res.json();
 
-  if (!data || !data.nome) return;
+    if (data && data.nome) {
+      document.getElementById("avatar").src = data.avatar;
+      document.getElementById("nome").innerText = data.nome;
+      document.getElementById("total").innerText = "R$" + data.total;
+      document.getElementById("vip").innerText = data.vip;
 
-  document.getElementById("avatar").src = data.avatar;
-  document.getElementById("nome").innerText = data.nome;
-  document.getElementById("total").innerText = "R$" + data.total;
-  document.getElementById("vip").innerText = data.vip;
+      if (data.posicao) {
+        document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
+      }
 
-  if (data.posicao) {
-    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
-  }
+      return;
+    }
+  } catch {}
+
+  /* 🔥 FALLBACK (SE NÃO EXISTE NA API) */
+  document.getElementById("nome").innerText = "Usuário não encontrado";
+  document.getElementById("avatar").src = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  document.getElementById("total").innerText = "R$0";
+  document.getElementById("vip").innerText = "Nenhum";
 }
 
 /* RANKING */
 async function carregarRanking() {
-  const res = await fetch(API + "/ranking");
-  const data = await res.json();
+  try {
+    const res = await fetch(API + "/ranking");
+    const data = await res.json();
 
-  const div = document.getElementById("ranking");
-  div.innerHTML = "";
+    const div = document.getElementById("ranking");
+    div.innerHTML = "";
 
-  data.forEach((user, i) => {
-    div.innerHTML += `
-      <div class="item" onclick="abrir('${user.id}')">
-        ${i+1}. ${user.nome} - R$${user.total}
-      </div>
-    `;
-  });
+    data.forEach((user, i) => {
+      div.innerHTML += `
+        <div class="item" onclick="abrir('${user.id}')">
+          ${i+1}. ${user.nome} - R$${user.total}
+        </div>
+      `;
+    });
+
+  } catch {
+    document.getElementById("ranking").innerText = "Erro ao carregar ranking";
+  }
 }
 
 /* NAVEGAÇÃO */
