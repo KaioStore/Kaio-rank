@@ -2,148 +2,175 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perfil</title>
+<title>Kaio Store</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial;
-  background: linear-gradient(180deg, #071a2f, #020b18);
+  background: linear-gradient(#071a2f, #020c18);
   color: white;
-  text-align: center;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.login {
+  background: #2b4d7c;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .container {
-  margin-top: 50px;
+  text-align: center;
+  margin-top: 30px;
 }
 
 .avatar {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 5px solid gold;
-  position: relative;
-}
-
-.coroa {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 30px;
+  border: 4px solid gold;
 }
 
 .nome {
-  font-size: 26px;
+  font-size: 22px;
   margin-top: 10px;
 }
 
-.rank {
+.posicao {
   color: gold;
   margin-bottom: 20px;
 }
 
-.boxes {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.box {
-  padding: 20px;
+.card {
+  margin: 10px auto;
+  width: 250px;
+  padding: 15px;
   border-radius: 15px;
-  width: 180px;
-  cursor: pointer;
-  transition: 0.2s;
 }
 
-.box:hover {
-  transform: scale(1.05);
+.gasto {
+  background: #1e3a5f;
 }
 
-.azul {
-  background: linear-gradient(145deg, #0a2c52, #133d73);
-}
-
-.dourado {
-  background: linear-gradient(145deg, #5a4300, #a67c00);
+.vip {
+  background: linear-gradient(45deg, #8a6d1d, #cfa62f);
 }
 
 .botao {
-  margin-top: 30px;
-  background: #2d4f7c;
-  padding: 15px;
+  margin-top: 20px;
+  padding: 12px;
+  width: 260px;
   border-radius: 10px;
-  width: 250px;
-  margin-left: auto;
-  margin-right: auto;
+  background: #3d5c86;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.botao:hover {
-  background: #3d6aa3;
+.ranking {
+  margin-top: 30px;
+}
+
+.item {
+  margin: 10px;
+  cursor: pointer;
 }
 </style>
-
 </head>
+
 <body>
 
-<div class="container">
+<header>
+  <div class="logo">Kaio Store</div>
+  <div class="login" onclick="loginDiscord()">Minha Conta</div>
+</header>
 
-  <div style="position: relative; display: inline-block;">
-    <div class="coroa">👑</div>
-    <img id="avatar" class="avatar" src="">
+<div class="container" id="perfil">
+  <img class="avatar" id="avatar">
+  <div class="nome" id="nome">Carregando...</div>
+  <div class="posicao" id="posicao"></div>
+
+  <div class="card gasto">
+    💰 Total gasto
+    <div id="total">R$0</div>
   </div>
 
-  <div id="nome" class="nome">Carregando...</div>
-  <div id="posicao" class="rank"></div>
-
-  <div class="boxes">
-    <div class="box azul" onclick="alert('Total gasto do usuário')">
-      <div>💰 Total gasto</div>
-      <strong id="total">R$0</strong>
-    </div>
-
-    <div class="box dourado" onclick="alert('Seu nível VIP')">
-      <div>👑 VIP atual</div>
-      <strong id="vip">Carregando</strong>
-    </div>
+  <div class="card vip">
+    👑 VIP atual
+    <div id="vip">Carregando</div>
   </div>
 
-  <div class="botao" onclick="voltarRanking()">
-    Voltar ao Ranking
-  </div>
-
+  <div class="botao" onclick="voltar()">Voltar ao Ranking</div>
 </div>
 
+<div class="ranking" id="ranking"></div>
+
 <script>
-const id = new URLSearchParams(window.location.search).get("id");
+const API = "https://attractive-analysis-production-b8e2.up.railway.app";
 
-fetch("https://SEU-LINK-RAILWAY.up.railway.app/perfil/" + id)
-  .then(res => res.json())
-  .then(data => {
+function pegarID() {
+  const url = new URL(window.location.href);
+  return url.searchParams.get("id");
+}
 
-    if (data.erro) {
-      document.body.innerHTML = "Erro ao carregar";
-      return;
-    }
+async function carregarPerfil(id) {
+  const res = await fetch(API + "/perfil/" + id);
+  const data = await res.json();
 
-    document.getElementById("nome").innerText = data.nome;
-    document.getElementById("avatar").src = data.avatar;
-    document.getElementById("total").innerText = "R$" + data.total;
-    document.getElementById("vip").innerText = data.vip;
+  document.getElementById("avatar").src = data.avatar;
+  document.getElementById("nome").innerText = data.nome;
+  document.getElementById("total").innerText = "R$" + data.total;
+  document.getElementById("vip").innerText = data.vip;
 
-    if (data.posicao) {
-      document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
-    }
+  if (data.posicao) {
+    document.getElementById("posicao").innerText = "#" + data.posicao + " no ranking";
+  }
+}
 
+async function carregarRanking() {
+  const res = await fetch(API + "/ranking");
+  const data = await res.json();
+
+  const div = document.getElementById("ranking");
+
+  data.forEach((user, i) => {
+    div.innerHTML += `
+      <div class="item" onclick="abrir('${user.id}')">
+        ${i+1}. ${user.nome} - R$${user.total}
+      </div>
+    `;
   });
+}
 
-function voltarRanking() {
-  window.location.href = "https://kaio-rank.vercel.app/";
+function abrir(id) {
+  window.location.href = "?id=" + id;
+}
+
+function voltar() {
+  window.location.href = "/";
+}
+
+function loginDiscord() {
+  window.location.href = "https://discord.com/oauth2/authorize?client_id=1485623307364466861&response_type=token&redirect_uri=" + encodeURIComponent(window.location.href);
+}
+
+const id = pegarID();
+
+if (id) {
+  document.getElementById("ranking").style.display = "none";
+  carregarPerfil(id);
+} else {
+  document.getElementById("perfil").style.display = "none";
+  carregarRanking();
 }
 </script>
 
